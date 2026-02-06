@@ -1,0 +1,230 @@
+import { Card, GameState, Player, Rank, Turn, ExperimentId, RANKS } from '../types/game.js';
+import { createDeck, shuffleDeck, dealCards } from './deck.js';
+
+/**
+ * Creates a new game state with dealt hands
+ */
+export function createGameState(
+  gameId: string,
+  experimentId: ExperimentId,
+  modelIds: string[],
+  seed?: number
+): GameState {
+  if (modelIds.length !== 4) {
+    throw new Error('Bullshit requires exactly 4 players');
+  }
+
+  const deck = shuffleDeck(createDeck(), seed);
+  const hands = dealCards(deck, 4);
+
+  const players: Player[] = modelIds.map((modelId, index) => ({
+    id: `player_${index}`,
+    modelId,
+    hand: hands[index],
+    isEliminated: false,
+  }));
+
+  return {
+    gameId,
+    experimentId,
+    players,
+    currentPlayerIndex: 0,
+    currentRank: 'A', // Game always starts with Aces
+    pile: [],
+    turns: [],
+    winner: null,
+    startTime: new Date(),
+  };
+}
+
+/**
+ * Gets the next rank in sequence (K wraps to A)
+ */
+export function getNextRank(currentRank: Rank): Rank {
+  const index = RANKS.indexOf(currentRank);
+  return RANKS[(index + 1) % RANKS.length];
+}
+
+/**
+ * Gets the current player
+ */
+export function getCurrentPlayer(state: GameState): Player {
+  return state.players[state.currentPlayerIndex];
+}
+
+/**
+ * Gets all players except the current one (for challenge window)
+ */
+export function getOtherPlayers(state: GameState): Player[] {
+  return state.players.filter((_, i) => i !== state.currentPlayerIndex && !state.players[i].isEliminated);
+}
+
+/**
+ * Removes cards from a player's hand
+ */
+export function removeCardsFromHand(player: Player, cards: Card[]): void {
+  for (const card of cards) {
+    const index = player.hand.findIndex((c) => c.rank === card.rank && c.suit === card.suit);
+    if (index !== -1) {
+      player.hand.splice(index, 1);
+    }
+  }
+}
+
+/**
+ * Adds cards to a player's hand
+ */
+export function addCardsToHand(player: Player, cards: Card[]): void {
+  player.hand.push(...cards);
+}
+
+/**
+ * Processes a play action (before challenge window)
+ */
+export function processPlay(
+  state: GameState,
+  playerId: string,
+  actualCards: Card[],
+  claimedCount: number,
+  reasoning: string
+): Turn {
+  const player = state.players.find((p) => p.id === playerId);
+  if (!player) {
+    throw new Error(`Player ${playerId} not found`);
+  }
+
+  // Validate player has the cards
+  for (const card of actualCards) {
+    const hasCard = player.hand.some((c) => c.rank === card.rank && c.suit === card.suit);
+    if (!hasCard) {
+      throw new Error(`Player ${playerId} does not have card ${card.rank}${card.suit}`);
+    }
+  }
+
+  // Determine if it's a lie
+  const wasLie = actualCards.some((card) => card.rank !== state.currentRank) || actualCards.length !== claimedCount;
+
+  // Remove cards from hand and add to pile
+  removeCardsFromHand(player, actualCards);
+  state.pile.push(...actualCards);
+
+  const turn: Turn = {
+    turnNumber: state.turns.length + 1,
+    playerId,
+    claimedRank: state.currentRank,
+    claimedCount,
+    actualCards,
+    wasLie,
+    challenged: false,
+    reasoning,
+    pileAfterTurn: state.pile.length,
+    handSizesAfterTurn: Object.fromEntries(state.players.map((p) => [p.id, p.hand.length])),
+  };
+
+  return turn;
+}
+
+/**
+ * Processes a challenge
+ */
+export function processChallenge(
+  state: GameState,
+  turn: Turn,
+  challengerId: string,
+  challengeReasoning: string
+): void {
+  const challenger = state.players.find((p) => p.id === challengerId);
+  const playedBy = state.players.find((p) => p.id === turn.playerId);
+
+  if (!challenger || !playedBy) {
+    throw new Error('Invalid challenger or player');
+  }
+
+  turn.challenged = true;
+  turn.challengerId = challengerId;
+  turn.challengeReasoning = challengeReasoning;
+
+  // Challenge is correct if the play was a lie
+  turn.challengeCorrect = turn.wasLie;
+
+  if (turn.wasLie) {
+    // Liar picks up the pile
+    addCardsToHand(playedBy, state.pile);
+  } else {
+    // Challenger picks up the pile
+    addCardsToHand(challenger, state.pile);
+  }
+
+  // Clear the pile
+  state.pile = [];
+
+  // Update hand sizes after challenge resolution
+  turn.handSizesAfterTurn = Object.fromEntries(state.players.map((p) => [p.id, p.hand.length]));
+}
+
+/**
+ * Advances to the next turn
+ */
+export function advanceTurn(state: GameState, turn: Turn): void {
+  state.turns.push(turn);
+  state.currentRank = getNextRank(state.currentRank);
+
+  // Move to next player (skip eliminated players)
+  do {
+    state.currentPlayerIndex = (state.currentPlayerIndex + 1) % state.players.length;
+  } while (state.players[state.currentPlayerIndex].isEliminated);
+}
+
+/**
+ * Checks if the game is over (someone has empty hand)
+ */
+export function checkWinner(state: GameState): string | null {
+  for (const player of state.players) {
+    if (player.hand.length === 0 && !player.isEliminated) {
+      return player.id;
+    }
+  }
+  return null;
+}
+
+/**
+ * Finalizes the game
+ */
+export function finalizeGame(state: GameState, winnerId: string): void {
+  state.winner = winnerId;
+  state.endTime = new Date();
+}
+
+/**
+ * Gets visible game info for a player (hides other hands)
+ */
+export function getVisibleState(state: GameState, playerId: string): {
+  hand: Card[];
+  currentRank: Rank;
+  pileSize: number;
+  otherPlayersCounts: Record<string, number>;
+  recentTurns: Turn[];
+} {
+  const player = state.players.find((p) => p.id === playerId);
+  if (!player) {
+    throw new Error(`Player ${playerId} not found`);
+  }
+
+  const otherPlayersCounts: Record<string, number> = {};
+  for (const p of state.players) {
+    if (p.id !== playerId && !p.isEliminated) {
+      otherPlayersCounts[p.modelId] = p.hand.length;
+    }
+  }
+
+  // Show last 5 turns for context
+  const recentTurns = state.turns.slice(-5);
+
+  return {
+    hand: player.hand,
+    currentRank: state.currentRank,
+    pileSize: state.pile.length,
+    otherPlayersCounts,
+    recentTurns,
+  };
+}
