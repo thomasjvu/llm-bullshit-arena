@@ -390,77 +390,6 @@ window.ModelThemes = (() => {
       }
     },
 
-    'Qwen/Qwen3-32B': {
-      name: 'Qwen3-32B',
-      shortName: 'Q3-32B',
-      title: 'THE DUAL',
-      accent: '#e040a0',
-      accentBright: '#ff66bb',
-      accentDim: '#aa2070',
-      secondary: '#ff99cc',
-      bg: [
-        'radial-gradient(ellipse at 45% 30%, rgba(224,64,160,0.12) 0%, transparent 55%)',
-        'radial-gradient(ellipse at 60% 75%, rgba(255,153,204,0.06) 0%, transparent 40%)',
-        'linear-gradient(180deg, #140610 0%, #200c1a 35%, #180814 70%, #0e040a 100%)',
-      ].join(', '),
-      patternSVG: `<svg width="60" height="60" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="8" stroke="rgba(224,64,160,0.03)" fill="none"/><circle cx="40" cy="40" r="8" stroke="rgba(224,64,160,0.03)" fill="none"/></svg>`,
-      character() {
-        return `<svg viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="80" cy="80" r="72" fill="rgba(224,64,160,0.1)"/>
-          <circle cx="80" cy="80" r="56" stroke="#e040a0" stroke-width="1" fill="none" opacity="0.15"/>
-          <!-- Yin-yang dual nature -->
-          <circle cx="80" cy="80" r="36" fill="#e040a0" opacity="0.2" stroke="#e040a0" stroke-width="1.5" opacity="0.4"/>
-          <!-- S-curve divider -->
-          <path d="M80 44 Q98 62 80 80 Q62 98 80 116" fill="#ff66bb" opacity="0.3"/>
-          <path d="M80 44 Q62 62 80 80 Q98 98 80 116" fill="#aa2070" opacity="0.3"/>
-          <!-- Dots -->
-          <circle cx="80" cy="62" r="5" fill="#aa2070" opacity="0.6"/>
-          <circle cx="80" cy="62" r="2" fill="#ff66bb" opacity="0.5"/>
-          <circle cx="80" cy="98" r="5" fill="#ff66bb" opacity="0.6"/>
-          <circle cx="80" cy="98" r="2" fill="#aa2070" opacity="0.5"/>
-          <!-- Outer orbit -->
-          <circle cx="80" cy="80" r="44" stroke="#e040a0" stroke-width="0.8" fill="none" opacity="0.15" stroke-dasharray="4 4"/>
-        </svg>`;
-      }
-    },
-
-    'Qwen/Qwen3-235B-A22B': {
-      name: 'Qwen3-235B',
-      shortName: 'Q3-235B',
-      title: 'THE TITAN',
-      accent: '#6622cc',
-      accentBright: '#8844ee',
-      accentDim: '#441188',
-      secondary: '#bb88ff',
-      bg: [
-        'radial-gradient(ellipse at 50% 30%, rgba(102,34,204,0.14) 0%, transparent 55%)',
-        'radial-gradient(ellipse at 35% 75%, rgba(187,136,255,0.06) 0%, transparent 40%)',
-        'linear-gradient(180deg, #0a0418 0%, #120828 35%, #0e0620 70%, #060312 100%)',
-      ].join(', '),
-      patternSVG: `<svg width="70" height="70" xmlns="http://www.w3.org/2000/svg"><polygon points="35,5 65,60 5,60" stroke="rgba(102,34,204,0.03)" fill="none"/></svg>`,
-      character() {
-        return `<svg viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="80" cy="80" r="72" fill="rgba(102,34,204,0.12)"/>
-          <circle cx="80" cy="80" r="60" stroke="#6622cc" stroke-width="1" fill="none" opacity="0.12"/>
-          <circle cx="80" cy="80" r="48" stroke="#6622cc" stroke-width="0.8" fill="none" opacity="0.1"/>
-          <!-- Titan triangle -->
-          <polygon points="80,28 125,108 35,108" fill="#6622cc" opacity="0.25" stroke="#8844ee" stroke-width="2" opacity="0.5"/>
-          <!-- Inner triangle inverted -->
-          <polygon points="80,95 58,58 102,58" fill="#441188" opacity="0.3" stroke="#bb88ff" stroke-width="1" opacity="0.3"/>
-          <!-- Eye of the titan -->
-          <circle cx="80" cy="72" r="8" fill="#8844ee" opacity="0.6"/>
-          <circle cx="80" cy="72" r="4" fill="#bb88ff" opacity="0.5"/>
-          <circle cx="80" cy="72" r="2" fill="#0a0418"/>
-          <!-- Power rays -->
-          <line x1="80" y1="28" x2="80" y2="18" stroke="#8844ee" stroke-width="1.5" opacity="0.4"/>
-          <line x1="125" y1="108" x2="132" y2="115" stroke="#8844ee" stroke-width="1.5" opacity="0.3"/>
-          <line x1="35" y1="108" x2="28" y2="115" stroke="#8844ee" stroke-width="1.5" opacity="0.3"/>
-          <!-- Weight text -->
-          <text x="80" y="130" text-anchor="middle" font-family="monospace" font-size="9" fill="#bb88ff" opacity="0.3">235B</text>
-        </svg>`;
-      }
-    },
-
     'dphn/Dolphin-Mistral-24B-Venice-Edition': {
       name: 'Dolphin-Mistral-24B',
       shortName: 'Dolphin',
@@ -644,26 +573,26 @@ window.ModelThemes = (() => {
     name: 'Unknown',
     shortName: '???',
     title: 'THE UNKNOWN',
-    accent: '#c4a7e7',
-    accentBright: '#e0c4ff',
-    accentDim: '#907aa9',
-    secondary: '#f0e6ff',
+    accent: '#9a9ab0',
+    accentBright: '#c8c8d8',
+    accentDim: '#606076',
+    secondary: '#d4d4e4',
     bg: [
-      'radial-gradient(ellipse at 50% 30%, rgba(196,167,231,0.1) 0%, transparent 50%)',
-      'linear-gradient(180deg, #1a1625 0%, #1e1a2d 50%, #1a1625 100%)',
+      'radial-gradient(ellipse at 50% 30%, rgba(160,160,180,0.06) 0%, transparent 50%)',
+      'linear-gradient(180deg, #0c0c0f 0%, #101014 50%, #0c0c0f 100%)',
     ].join(', '),
     patternSVG: '',
     character() {
       return `<svg viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <radialGradient id="uk-glow" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stop-color="#c4a7e7" stop-opacity="0.2"/>
-            <stop offset="100%" stop-color="#c4a7e7" stop-opacity="0"/>
+            <stop offset="0%" stop-color="#9a9ab0" stop-opacity="0.15"/>
+            <stop offset="100%" stop-color="#9a9ab0" stop-opacity="0"/>
           </radialGradient>
         </defs>
         <circle cx="80" cy="80" r="72" fill="url(#uk-glow)"/>
-        <circle cx="80" cy="80" r="40" stroke="#c4a7e7" stroke-width="1.5" fill="none" opacity="0.2"/>
-        <text x="80" y="88" text-anchor="middle" font-family="monospace" font-size="28" fill="#c4a7e7" opacity="0.6">?</text>
+        <circle cx="80" cy="80" r="40" stroke="#9a9ab0" stroke-width="1.5" fill="none" opacity="0.2"/>
+        <text x="80" y="88" text-anchor="middle" font-family="monospace" font-size="28" fill="#9a9ab0" opacity="0.6">?</text>
       </svg>`;
     }
   };

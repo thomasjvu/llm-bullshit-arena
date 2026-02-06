@@ -75,33 +75,71 @@ const SoundFX = (() => {
     },
 
     challenge() {
+      // Heavy flat desk slam — massive low-end impact
       const ac = getCtx();
       const now = ac.currentTime;
-      const scratch = createBrownNoise(0.25);
-      const scratchGain = ac.createGain();
-      const scratchBP = ac.createBiquadFilter();
-      scratchBP.type = 'bandpass';
-      scratchBP.frequency.setValueAtTime(4000, now);
-      scratchBP.frequency.exponentialRampToValueAtTime(600, now + 0.2);
-      scratchBP.Q.value = 3;
-      scratchGain.gain.setValueAtTime(0.001, now);
-      scratchGain.gain.linearRampToValueAtTime(0.35, now + 0.01);
-      scratchGain.gain.setValueAtTime(0.25, now + 0.08);
-      scratchGain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
-      scratch.connect(scratchBP).connect(scratchGain).connect(ac.destination);
-      scratch.start(now);
-      scratch.stop(now + 0.25);
-      const hit = ac.createOscillator();
-      const hitGain = ac.createGain();
-      hit.type = 'sine';
-      hit.frequency.setValueAtTime(100, now + 0.02);
-      hit.frequency.exponentialRampToValueAtTime(35, now + 0.2);
-      hitGain.gain.setValueAtTime(0.001, now);
-      hitGain.gain.linearRampToValueAtTime(0.3, now + 0.025);
-      hitGain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
-      hit.connect(hitGain).connect(ac.destination);
-      hit.start(now);
-      hit.stop(now + 0.25);
+
+      // Sub-bass boom — the weight of the slam
+      const sub = ac.createOscillator();
+      const subGain = ac.createGain();
+      sub.type = 'sine';
+      sub.frequency.setValueAtTime(80, now);
+      sub.frequency.exponentialRampToValueAtTime(20, now + 0.4);
+      subGain.gain.setValueAtTime(0.001, now);
+      subGain.gain.linearRampToValueAtTime(0.8, now + 0.003);
+      subGain.gain.setValueAtTime(0.7, now + 0.05);
+      subGain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+      sub.connect(subGain).connect(ac.destination);
+      sub.start(now);
+      sub.stop(now + 0.55);
+
+      // Mid thud for body
+      const mid = ac.createOscillator();
+      const midGain = ac.createGain();
+      const midLP = ac.createBiquadFilter();
+      mid.type = 'sine';
+      mid.frequency.setValueAtTime(150, now);
+      mid.frequency.exponentialRampToValueAtTime(40, now + 0.2);
+      midLP.type = 'lowpass';
+      midLP.frequency.value = 300;
+      midGain.gain.setValueAtTime(0.001, now);
+      midGain.gain.linearRampToValueAtTime(0.6, now + 0.003);
+      midGain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+      mid.connect(midLP).connect(midGain).connect(ac.destination);
+      mid.start(now);
+      mid.stop(now + 0.4);
+
+      // Wide noise burst — the crack/slap of hand on desk
+      const slap = createBrownNoise(0.15);
+      const slapGain = ac.createGain();
+      const slapBP = ac.createBiquadFilter();
+      slapBP.type = 'bandpass';
+      slapBP.frequency.value = 800;
+      slapBP.Q.value = 0.5;
+      slapGain.gain.setValueAtTime(0.001, now);
+      slapGain.gain.linearRampToValueAtTime(0.7, now + 0.001);
+      slapGain.gain.setValueAtTime(0.5, now + 0.02);
+      slapGain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+      slap.connect(slapBP).connect(slapGain).connect(ac.destination);
+      slap.start(now);
+      slap.stop(now + 0.15);
+
+      // Rattling overtone — desk vibration after slam
+      const rattle = ac.createOscillator();
+      const rattleGain = ac.createGain();
+      const rattleLP = ac.createBiquadFilter();
+      rattle.type = 'triangle';
+      rattle.frequency.setValueAtTime(55, now + 0.04);
+      rattle.frequency.setValueAtTime(50, now + 0.15);
+      rattle.frequency.exponentialRampToValueAtTime(35, now + 0.6);
+      rattleLP.type = 'lowpass';
+      rattleLP.frequency.value = 200;
+      rattleGain.gain.setValueAtTime(0.001, now + 0.04);
+      rattleGain.gain.linearRampToValueAtTime(0.15, now + 0.06);
+      rattleGain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+      rattle.connect(rattleLP).connect(rattleGain).connect(ac.destination);
+      rattle.start(now + 0.04);
+      rattle.stop(now + 0.65);
     },
 
     challengeCorrect() {
@@ -209,6 +247,62 @@ const SoundFX = (() => {
         const vol = 0.15 + Math.random() * 0.15;
         cardFlickSound(ac, t, vol);
       }
+    },
+
+    // Per-character voice blips — each player gets a distinct voice
+    _textBlipLast: 0,
+    _voices: [
+      { base: 320, range: 60, wave: 'triangle', lp: 1800 },  // player 0: warm low
+      { base: 480, range: 80, wave: 'triangle', lp: 2200 },  // player 1: mid bright
+      { base: 260, range: 50, wave: 'sine',     lp: 1400 },  // player 2: deep mellow
+      { base: 540, range: 90, wave: 'triangle', lp: 2600 },  // player 3: high airy
+    ],
+    textBlip(playerIndex) {
+      const now = performance.now();
+      if (now - this._textBlipLast < 55) return; // throttle ~18 blips/sec
+      this._textBlipLast = now;
+
+      const ac = getCtx();
+      const t = ac.currentTime;
+      const voice = this._voices[playerIndex] || this._voices[0];
+
+      // Main tone — warm triangle/sine with pitch wobble
+      const osc = ac.createOscillator();
+      const gain = ac.createGain();
+      const lp = ac.createBiquadFilter();
+
+      osc.type = voice.wave;
+      const freq = voice.base + (Math.random() - 0.5) * voice.range;
+      osc.frequency.setValueAtTime(freq, t);
+      osc.frequency.setValueAtTime(freq * (0.97 + Math.random() * 0.06), t + 0.02);
+      osc.frequency.exponentialRampToValueAtTime(freq * 0.88, t + 0.055);
+
+      lp.type = 'lowpass';
+      lp.frequency.value = voice.lp;
+      lp.Q.value = 0.7;
+
+      // Soft attack, short sustain, gentle decay
+      gain.gain.setValueAtTime(0.001, t);
+      gain.gain.linearRampToValueAtTime(0.07, t + 0.006);
+      gain.gain.setValueAtTime(0.055, t + 0.025);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.06);
+
+      osc.connect(lp).connect(gain).connect(ac.destination);
+      osc.start(t);
+      osc.stop(t + 0.065);
+
+      // Subtle harmonic overtone for warmth
+      const h = ac.createOscillator();
+      const hGain = ac.createGain();
+      h.type = 'sine';
+      h.frequency.setValueAtTime(freq * 1.5, t);
+      h.frequency.exponentialRampToValueAtTime(freq * 1.3, t + 0.04);
+      hGain.gain.setValueAtTime(0.001, t);
+      hGain.gain.linearRampToValueAtTime(0.015, t + 0.008);
+      hGain.gain.exponentialRampToValueAtTime(0.001, t + 0.045);
+      h.connect(hGain).connect(ac.destination);
+      h.start(t);
+      h.stop(t + 0.05);
     }
   };
 })();
@@ -230,14 +324,14 @@ function animateCardsToTarget(sourceEl, targetEl, count, onDone) {
     card.className = 'flying-card';
     card.innerHTML = window.CardRenderer.getCardBackSVG();
 
-    card.style.left = srcRect.left + srcRect.width / 2 - 22 + 'px';
-    card.style.top = srcRect.top + srcRect.height / 2 - 31 + 'px';
+    card.style.left = srcRect.left + srcRect.width / 2 - 17 + 'px';
+    card.style.top = srcRect.top + srcRect.height / 2 - 24 + 'px';
     card.style.transform = `rotate(${(Math.random() - 0.5) * 15}deg)`;
     document.body.appendChild(card);
 
     setTimeout(() => {
-      card.style.left = tgtRect.left + tgtRect.width / 2 - 22 + (Math.random() - 0.5) * 20 + 'px';
-      card.style.top = tgtRect.top + tgtRect.height / 2 - 31 + (Math.random() - 0.5) * 10 + 'px';
+      card.style.left = tgtRect.left + tgtRect.width / 2 - 17 + (Math.random() - 0.5) * 20 + 'px';
+      card.style.top = tgtRect.top + tgtRect.height / 2 - 24 + (Math.random() - 0.5) * 10 + 'px';
       card.style.transform = `rotate(${(Math.random() - 0.5) * 30}deg)`;
       card.style.opacity = '0.7';
     }, 20 + i * 80);
@@ -285,42 +379,70 @@ function animateDeal(state) {
   });
 }
 
-// ─── BS Callout Text Effect ──────────────────────────────────────────
+// ─── Phoenix Wright Objection System ─────────────────────────────────
 
-const BS_CALL_WORDS = ['BULLSHIT!', 'LIAR!!', 'NO WAY!', 'BS!!!', 'FAKE!!'];
-const BS_CORRECT_WORDS = ['GOTCHA!', 'BUSTED!!', 'CAUGHT!', 'EXPOSED!'];
-const BS_WRONG_WORDS = ['WRONG!', 'OOPS!!', 'NOPE!', 'FAIL!'];
+const OBJECTION_WORDS = ['OBJECTION!', 'BULLSHIT!', 'HOLD IT!', 'LIAR!'];
+const VERDICT_CORRECT = ['GOTCHA!', 'BUSTED!', 'GUILTY!', 'CAUGHT!'];
+const VERDICT_WRONG = ['OVERRULED!', 'WRONG!', 'INNOCENT!', 'OOPS!'];
 
 function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
-function showBSCallout(targetEl, text, cssClass) {
-  if (!targetEl) return;
-  const rect = targetEl.getBoundingClientRect();
+function createSpeedLines(color) {
+  const lines = [];
+  for (let i = 0; i < 20; i++) {
+    const angle = (i / 20) * 360;
+    const x1 = 50 + Math.cos(angle * Math.PI / 180) * 15;
+    const y1 = 50 + Math.sin(angle * Math.PI / 180) * 15;
+    const x2 = 50 + Math.cos(angle * Math.PI / 180) * 55;
+    const y2 = 50 + Math.sin(angle * Math.PI / 180) * 55;
+    lines.push(`<line x1="${x1}%" y1="${y1}%" x2="${x2}%" y2="${y2}%" stroke="${color}" stroke-width="2" opacity="${0.15 + Math.random() * 0.2}"/>`);
+  }
+  return `<svg class="objection-lines" viewBox="0 0 100 100" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">${lines.join('')}</svg>`;
+}
 
-  const el = document.createElement('div');
-  el.className = `bs-callout pos-a ${cssClass}`;
-  el.textContent = text;
+function showObjection(text, cssClass, whoName, lineColor) {
+  const overlay = document.createElement('div');
+  overlay.className = 'objection-overlay';
 
-  el.style.position = 'fixed';
-  el.style.left = (rect.left + rect.width / 2 - 60) + 'px';
-  el.style.top = (rect.top + rect.height / 2 - 20) + 'px';
+  overlay.innerHTML = `
+    <div class="objection-bg"></div>
+    ${createSpeedLines(lineColor)}
+    <div class="objection-banner">
+      <div class="objection-who">${whoName}</div>
+      <div class="objection-text ${cssClass}">${text}</div>
+    </div>
+  `;
 
-  document.body.appendChild(el);
-  setTimeout(() => el.remove(), 1600);
+  document.body.appendChild(overlay);
+
+  // Screen shake
+  document.querySelector('.game-container').classList.add('screen-shake');
+  setTimeout(() => document.querySelector('.game-container').classList.remove('screen-shake'), 300);
+
+  // Fade out and remove — hold longer for dramatic effect
+  setTimeout(() => {
+    overlay.classList.add('fading');
+    setTimeout(() => overlay.remove(), 500);
+  }, 2400);
 }
 
 function showChallengeCallout(challengerEl, isCorrect) {
-  showBSCallout(challengerEl, pick(BS_CALL_WORDS), 'bs-call');
+  // Get challenger name from the column
+  const col = challengerEl?.closest?.('.player-column') || challengerEl;
+  const nameEl = col?.querySelector?.('.player-name');
+  const who = nameEl?.textContent || '???';
+
+  showObjection(pick(OBJECTION_WORDS), 'obj-call', who, 'rgba(255,68,68,0.4)');
 
   setTimeout(() => {
     if (isCorrect) {
       SoundFX.challengeCorrect();
-      showBSCallout(challengerEl, pick(BS_CORRECT_WORDS), 'bs-correct');
+      showObjection(pick(VERDICT_CORRECT), 'obj-correct', 'the cards reveal...', 'rgba(68,255,170,0.4)');
     } else {
       SoundFX.challengeWrong();
-      showBSCallout(challengerEl, pick(BS_WRONG_WORDS), 'bs-wrong');
+      showObjection(pick(VERDICT_WRONG), 'obj-wrong', 'the cards reveal...', 'rgba(255,170,68,0.4)');
     }
-  }, 900);
+  }, 2900);
 }
 
 // ─── App State & Constants ───────────────────────────────────────────
@@ -331,6 +453,7 @@ let currentGameId = null;
 let autoPlayAbort = null;
 let isAutoPlaying = false;
 let previousState = null;
+let _activeVoiceIndex = 0;
 
 // DOM Elements
 const newGameBtn = document.getElementById('new-game-btn');
@@ -344,6 +467,9 @@ const currentRankDisplay = document.getElementById('current-rank');
 const gamePhaseDisplay = document.getElementById('game-phase');
 const winnerOverlay = document.getElementById('winner-overlay');
 const winnerName = document.getElementById('winner-name');
+const thoughtModal = document.getElementById('thought-modal');
+const logToggleBtn = document.getElementById('log-toggle-btn');
+const logCloseBtn = document.getElementById('log-close-btn');
 
 // ─── Theme Application ──────────────────────────────────────────────
 
@@ -411,6 +537,14 @@ function createCardElement(cardStr, showFace = true) {
 newGameBtn.addEventListener('click', startNewGame);
 autoPlayBtn.addEventListener('click', toggleAutoPlay);
 stepBtn.addEventListener('click', stepGame);
+
+// Log drawer toggle
+logToggleBtn.addEventListener('click', () => {
+  thoughtModal.classList.toggle('drawer-hidden');
+});
+logCloseBtn.addEventListener('click', () => {
+  thoughtModal.classList.add('drawer-hidden');
+});
 
 async function startNewGame() {
   const experimentId = parseInt(experimentSelect.value);
@@ -489,8 +623,8 @@ function toggleAutoPlay() {
 async function startAutoPlay() {
   isAutoPlaying = true;
   autoPlayAbort = new AbortController();
-  autoPlayBtn.textContent = 'stop';
-  autoPlayBtn.classList.add('cute');
+  const autoLabel = autoPlayBtn.querySelector('span');
+  if (autoLabel) autoLabel.textContent = 'stop';
   stepBtn.disabled = true;
 
   const signal = autoPlayAbort.signal;
@@ -546,8 +680,8 @@ async function startAutoPlay() {
 
 function stopAutoPlay() {
   isAutoPlaying = false;
-  autoPlayBtn.textContent = 'auto';
-  autoPlayBtn.classList.remove('cute');
+  const autoLabel2 = autoPlayBtn.querySelector('span');
+  if (autoLabel2) autoLabel2.textContent = 'auto';
   stepBtn.disabled = false;
 
   if (autoPlayAbort) {
@@ -600,6 +734,11 @@ function handleSSEEvent(eventType, data) {
       const playerIndex = previousState?.players?.findIndex(p => p.id === data.playerId);
       if (playerIndex != null && playerIndex >= 0) {
         clearStreamText();
+        _activeVoiceIndex = playerIndex;
+        // Clear this player's action display for fresh thinking
+        const actionEl = document.getElementById(`action-${playerIndex}`);
+        if (actionEl) actionEl.innerHTML = '';
+
         const streamEl = document.getElementById(`stream-${playerIndex}`);
         if (streamEl) {
           streamEl.textContent = '';
@@ -613,6 +752,7 @@ function handleSSEEvent(eventType, data) {
       if (activeStream) {
         activeStream.textContent += data.text;
         activeStream.scrollTop = activeStream.scrollHeight;
+        SoundFX.textBlip(_activeVoiceIndex);
       }
       break;
     }
@@ -642,6 +782,56 @@ function clearStreamText() {
   });
 }
 
+// ─── Structured Action Display ────────────────────────────────
+
+function clearAllActions() {
+  for (let i = 0; i < 4; i++) {
+    const el = document.getElementById(`action-${i}`);
+    if (el) el.innerHTML = '';
+  }
+}
+
+function showPlayAction(playerIndex, claimedCount, claimedRank, reasoning) {
+  const el = document.getElementById(`action-${playerIndex}`);
+  if (!el) return;
+
+  let html = `<div class="action-claim"><span class="claim-count">${claimedCount}×</span> <span class="claim-rank">${claimedRank}</span></div>`;
+  if (reasoning && reasoning !== 'No reasoning provided') {
+    const clean = cleanReasoning(reasoning);
+    if (clean) html += `<div class="action-reasoning">${clean}</div>`;
+  }
+  el.innerHTML = html;
+}
+
+function showChallengeAction(playerIndex, challenged, reasoning) {
+  const el = document.getElementById(`action-${playerIndex}`);
+  if (!el) return;
+
+  if (challenged) {
+    let html = `<div class="action-verdict verdict-challenge">calls BS!</div>`;
+    if (reasoning) {
+      const clean = cleanReasoning(reasoning);
+      if (clean) html += `<div class="action-reasoning">${clean}</div>`;
+    }
+    el.innerHTML = html;
+  } else {
+    el.innerHTML = `<div class="action-verdict verdict-pass">pass</div>`;
+  }
+}
+
+function cleanReasoning(text) {
+  if (!text) return '';
+  // Strip [think]...[answer] wrapper if present
+  let clean = text.replace(/^\[think\][\s\S]*?\[answer\]\s*/i, '');
+  // Strip any remaining JSON-like content
+  clean = clean.replace(/\{[\s\S]*\}/g, '').trim();
+  // Strip <think> tags
+  clean = clean.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+  // Truncate
+  if (clean.length > 120) clean = clean.substring(0, 117) + '...';
+  return clean;
+}
+
 function logError(title, detail) {
   const entry = document.createElement('div');
   entry.className = 'turn-entry';
@@ -668,6 +858,29 @@ function renderGameState(state) {
   const playerId = newTurn?.playerId || state.pendingTurn?.playerId;
   if (playerId) {
     activePlayerIndex = state.players.findIndex(p => p.id === playerId);
+  }
+
+  // Show structured play/challenge actions in player columns
+  if (pendingJustAppeared && state.pendingTurn) {
+    clearAllActions();
+    if (activePlayerIndex !== null && activePlayerIndex >= 0) {
+      showPlayAction(activePlayerIndex, state.pendingTurn.claimedCount, state.pendingTurn.claimedRank, state.pendingTurn.reasoning);
+    }
+  }
+
+  if (pendingJustResolved && newTurn) {
+    // Show the play on the player's column
+    const playerIdx = state.players.findIndex(p => p.id === newTurn.playerId);
+    if (playerIdx >= 0) {
+      showPlayAction(playerIdx, newTurn.claimedCount, newTurn.claimedRank, newTurn.reasoning);
+    }
+    // Show challenge result if it happened
+    if (newTurn.challenged) {
+      const challengerIdx = state.players.findIndex(p => p.id === newTurn.challengerId);
+      if (challengerIdx >= 0) {
+        showChallengeAction(challengerIdx, true, newTurn.challengeReasoning);
+      }
+    }
   }
 
   // Sound effects + BS callouts

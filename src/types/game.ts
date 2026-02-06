@@ -146,8 +146,6 @@ export const MODELS = [
   'Qwen/Qwen2.5-32B-Instruct',
   'Qwen/Qwen2-72B-Instruct',
   'mistralai/Mistral-Small-3.2-24B-Instruct-2506',
-  'Qwen/Qwen3-32B',
-  'Qwen/Qwen3-235B-A22B',
   'dphn/Dolphin-Mistral-24B-Venice-Edition',
   'featherless-ai/QRWKV-72B',
   'NousResearch/Hermes-4-70B',

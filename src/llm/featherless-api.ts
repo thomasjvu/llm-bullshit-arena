@@ -87,7 +87,7 @@ export class FeatherlessClient {
             seed: this.config.seed,
             max_tokens: maxTokens,
           }),
-          signal: AbortSignal.timeout(300_000),
+          signal: AbortSignal.timeout(90_000),
         });
 
         if (!response.ok) {
@@ -195,7 +195,7 @@ export class FeatherlessClient {
             stream: true,
             stream_options: { include_usage: true },
           }),
-          signal: AbortSignal.timeout(300_000),
+          signal: AbortSignal.timeout(90_000),
         });
 
         if (!response.ok) {
