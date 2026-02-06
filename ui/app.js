@@ -1,5 +1,5 @@
 // LLM Bullshit - Game Visualizer
-// Step-by-step card game with visible hands and LLM thoughts
+// 4-column layout with character portraits and themed backgrounds
 
 // ─── Sound Effects (Web Audio API) ───────────────────────────────────
 
@@ -12,7 +12,6 @@ const SoundFX = (() => {
     return ctx;
   }
 
-  // Brownian (red) noise — sounds warmer/more physical than white noise
   function createBrownNoise(duration) {
     const ac = getCtx();
     const len = ac.sampleRate * duration;
@@ -39,7 +38,6 @@ const SoundFX = (() => {
     return src;
   }
 
-  // Single card flick — short filtered brown noise snap
   function cardFlickSound(ac, time, volume) {
     const noise = createBrownNoise(0.08);
     const gain = ac.createGain();
@@ -59,13 +57,10 @@ const SoundFX = (() => {
   }
 
   return {
-    // Card sliding onto table — a soft thwip with body
     playCard() {
       const ac = getCtx();
       const now = ac.currentTime;
-      // Initial snap transient
       cardFlickSound(ac, now, 0.4);
-      // Soft tonal body — very short sine thud for table impact
       const thud = ac.createOscillator();
       const thudGain = ac.createGain();
       thud.type = 'sine';
@@ -79,11 +74,9 @@ const SoundFX = (() => {
       thud.stop(now + 0.1);
     },
 
-    // Challenge call — dramatic "record scratch" burst
     challenge() {
       const ac = getCtx();
       const now = ac.currentTime;
-      // Quick descending noise sweep (like a record scratch)
       const scratch = createBrownNoise(0.25);
       const scratchGain = ac.createGain();
       const scratchBP = ac.createBiquadFilter();
@@ -98,7 +91,6 @@ const SoundFX = (() => {
       scratch.connect(scratchBP).connect(scratchGain).connect(ac.destination);
       scratch.start(now);
       scratch.stop(now + 0.25);
-      // Dramatic low hit
       const hit = ac.createOscillator();
       const hitGain = ac.createGain();
       hit.type = 'sine';
@@ -112,11 +104,9 @@ const SoundFX = (() => {
       hit.stop(now + 0.25);
     },
 
-    // Caught the lie — triumphant rising two-tone sting
     challengeCorrect() {
       const ac = getCtx();
       const now = ac.currentTime;
-      // Two bright rising notes
       [523, 784].forEach((freq, i) => {
         const osc = ac.createOscillator();
         const gain = ac.createGain();
@@ -134,7 +124,6 @@ const SoundFX = (() => {
         osc.start(t);
         osc.stop(t + 0.35);
       });
-      // Bright noise accent
       const accent = createNoise(0.08);
       const accentGain = ac.createGain();
       const accentHP = ac.createBiquadFilter();
@@ -148,11 +137,9 @@ const SoundFX = (() => {
       accent.stop(now + 0.2);
     },
 
-    // Wrong call — sad descending two-tone + buzz
     challengeWrong() {
       const ac = getCtx();
       const now = ac.currentTime;
-      // Two descending tones (minor feel)
       [392, 233].forEach((freq, i) => {
         const osc = ac.createOscillator();
         const gain = ac.createGain();
@@ -175,11 +162,9 @@ const SoundFX = (() => {
       });
     },
 
-    // Win — warm ascending chord with shimmer
     win() {
       const ac = getCtx();
       const now = ac.currentTime;
-      // C major arpeggio with soft attack
       [523, 659, 784, 1047].forEach((freq, i) => {
         const osc = ac.createOscillator();
         const gain = ac.createGain();
@@ -197,7 +182,6 @@ const SoundFX = (() => {
         osc.start(t);
         osc.stop(t + 0.5);
       });
-      // Shimmer noise tail
       const shimmer = createNoise(0.4);
       const shimGain = ac.createGain();
       const shimBP = ac.createBiquadFilter();
@@ -212,13 +196,11 @@ const SoundFX = (() => {
       shimmer.stop(now + 0.7);
     },
 
-    // Single card flick sound (for deal animation)
     cardFlick() {
       const ac = getCtx();
       cardFlickSound(ac, ac.currentTime, 0.15 + Math.random() * 0.15);
     },
 
-    // Deal/shuffle — rapid sequence of card flicks
     deal() {
       const ac = getCtx();
       const now = ac.currentTime;
@@ -248,13 +230,11 @@ function animateCardsToTarget(sourceEl, targetEl, count, onDone) {
     card.className = 'flying-card';
     card.innerHTML = window.CardRenderer.getCardBackSVG();
 
-    // Start position
     card.style.left = srcRect.left + srcRect.width / 2 - 22 + 'px';
     card.style.top = srcRect.top + srcRect.height / 2 - 31 + 'px';
     card.style.transform = `rotate(${(Math.random() - 0.5) * 15}deg)`;
     document.body.appendChild(card);
 
-    // Trigger reflow, then animate
     setTimeout(() => {
       card.style.left = tgtRect.left + tgtRect.width / 2 - 22 + (Math.random() - 0.5) * 20 + 'px';
       card.style.top = tgtRect.top + tgtRect.height / 2 - 31 + (Math.random() - 0.5) * 10 + 'px';
@@ -262,7 +242,6 @@ function animateCardsToTarget(sourceEl, targetEl, count, onDone) {
       card.style.opacity = '0.7';
     }, 20 + i * 80);
 
-    // Remove after animation
     setTimeout(() => {
       card.remove();
       completed++;
@@ -271,7 +250,7 @@ function animateCardsToTarget(sourceEl, targetEl, count, onDone) {
   }
 }
 
-// ─── Deal Animation — cards fly from center to each player ──────────
+// ─── Deal Animation ──────────────────────────────────────────────────
 
 function animateDeal(state) {
   if (!state.players) return;
@@ -279,12 +258,9 @@ function animateDeal(state) {
   if (totalCards === 0) return;
 
   const playerCount = state.players.length;
-  // Deal cards round-robin to each player, one at a time
-  let cardIndex = 0;
   const cardsPerPlayer = [];
   state.players.forEach(p => cardsPerPlayer.push(p.handSize || 0));
 
-  // Build deal sequence: round-robin until all cards dealt
   const dealOrder = [];
   let maxCards = Math.max(...cardsPerPlayer);
   for (let round = 0; round < maxCards; round++) {
@@ -295,7 +271,7 @@ function animateDeal(state) {
     }
   }
 
-  const stagger = 60; // ms between each card
+  const stagger = 60;
   dealOrder.forEach((playerIdx, i) => {
     setTimeout(() => {
       const handEl = document.querySelector(`.player-hand[data-hand="${playerIdx}"]`);
@@ -309,7 +285,7 @@ function animateDeal(state) {
   });
 }
 
-// ─── BS Callout Text Effect (codepen crowd style) ───────────────────
+// ─── BS Callout Text Effect ──────────────────────────────────────────
 
 const BS_CALL_WORDS = ['BULLSHIT!', 'LIAR!!', 'NO WAY!', 'BS!!!', 'FAKE!!'];
 const BS_CORRECT_WORDS = ['GOTCHA!', 'BUSTED!!', 'CAUGHT!', 'EXPOSED!'];
@@ -317,7 +293,6 @@ const BS_WRONG_WORDS = ['WRONG!', 'OOPS!!', 'NOPE!', 'FAIL!'];
 
 function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
-// Show a single callout word near the target with codepen perspective warp
 function showBSCallout(targetEl, text, cssClass) {
   if (!targetEl) return;
   const rect = targetEl.getBoundingClientRect();
@@ -326,20 +301,17 @@ function showBSCallout(targetEl, text, cssClass) {
   el.className = `bs-callout pos-a ${cssClass}`;
   el.textContent = text;
 
-  // Position above and to the left of the player
   el.style.position = 'fixed';
-  el.style.left = (rect.left + rect.width / 2 - 80) + 'px';
-  el.style.top = (rect.top - 30) + 'px';
+  el.style.left = (rect.left + rect.width / 2 - 60) + 'px';
+  el.style.top = (rect.top + rect.height / 2 - 20) + 'px';
 
   document.body.appendChild(el);
   setTimeout(() => el.remove(), 1600);
 }
 
 function showChallengeCallout(challengerEl, isCorrect) {
-  // Initial "BULLSHIT!" callout
   showBSCallout(challengerEl, pick(BS_CALL_WORDS), 'bs-call');
 
-  // Delayed result callout with its own sound
   setTimeout(() => {
     if (isCorrect) {
       SoundFX.challengeCorrect();
@@ -373,12 +345,57 @@ const gamePhaseDisplay = document.getElementById('game-phase');
 const winnerOverlay = document.getElementById('winner-overlay');
 const winnerName = document.getElementById('winner-name');
 
+// ─── Theme Application ──────────────────────────────────────────────
+
+function applyModelThemes(players) {
+  players.forEach((player, i) => {
+    const theme = window.ModelThemes.getTheme(player.modelId);
+    const column = document.querySelector(`.player-column[data-column="${i}"]`);
+    if (!column) return;
+
+    // Set column accent color as CSS custom property
+    column.style.setProperty('--col-accent', theme.accent);
+    column.style.setProperty('--col-accent-bright', theme.accentBright);
+
+    // Apply background
+    const bgEl = column.querySelector('.column-bg');
+    if (bgEl) {
+      bgEl.style.background = theme.bg;
+      // Add pattern overlay if available
+      if (theme.patternSVG) {
+        const encoded = encodeURIComponent(theme.patternSVG);
+        bgEl.style.backgroundImage = bgEl.style.background;
+        bgEl.style.background = `url("data:image/svg+xml,${encoded}"), ${theme.bg}`;
+      }
+    }
+
+    // Insert character SVG
+    const charEl = document.getElementById(`char-${i}`);
+    if (charEl) {
+      charEl.innerHTML = theme.character();
+    }
+
+    // Set character title
+    const titleEl = document.getElementById(`title-${i}`);
+    if (titleEl) {
+      titleEl.textContent = theme.title;
+      titleEl.style.color = theme.accent;
+    }
+  });
+}
+
+function clearColumnStates() {
+  document.querySelectorAll('.player-column').forEach(col => {
+    col.classList.remove('is-thinking', 'is-challenging', 'is-winner', 'is-eliminated');
+  });
+}
+
 // Helpers
 function shortenModelName(name) {
   if (!name) return '???';
   const parts = name.split('/');
   const full = parts[parts.length - 1];
-  return full.length > 14 ? full.substring(0, 12) + '…' : full;
+  return full.length > 16 ? full.substring(0, 14) + '…' : full;
 }
 
 function createCardElement(cardStr, showFace = true) {
@@ -411,17 +428,18 @@ async function startNewGame() {
     const data = await response.json();
     currentGameId = data.gameId;
 
-    // Enable controls
     autoPlayBtn.disabled = false;
     stepBtn.disabled = false;
 
-    // Clear thought log
-    thoughtLog.innerHTML = '<div class="empty-thought">game started! click step or auto to begin...</div>';
+    thoughtLog.innerHTML = '<div class="empty-thought">game started — click step or auto to begin...</div>';
 
-    // Update UI first so player positions are rendered
+    // Apply visual themes to columns based on which models are playing
+    if (data.players) {
+      applyModelThemes(data.players);
+    }
+
+    // Render state and animate deal
     renderGameState(data);
-
-    // Animate cards dealing from center pile to each player
     animateDeal(data);
 
   } catch (error) {
@@ -436,28 +454,20 @@ async function stepGame() {
   try {
     stepBtn.disabled = true;
 
-    const response = await fetch(`${API_BASE}/game/${currentGameId}/step`, {
+    const response = await fetch(`${API_BASE}/game/${currentGameId}/step?stream=1`, {
       method: 'POST'
     });
 
-    const data = await response.json();
-
-    if (data.error) {
-      console.error('Step error:', data.error, data.details);
-      logError(data.error, data.details);
-      stepBtn.disabled = false;
-      return;
+    if (response.body && response.headers.get('content-type')?.includes('text/event-stream')) {
+      await consumeSSEStream(response);
+    } else {
+      const data = await response.json();
+      if (data.error) { logError(data.error, data.details); stepBtn.disabled = false; return; }
+      if (data.stepInProgress) { stepBtn.disabled = false; return; }
+      renderGameState(data);
     }
 
-    if (data.stepInProgress) {
-      console.log('Step already in progress, waiting...');
-      stepBtn.disabled = false;
-      return;
-    }
-
-    renderGameState(data);
-
-    if (data.phase !== 'finished') {
+    if (previousState?.phase !== 'finished') {
       stepBtn.disabled = false;
     }
 
@@ -479,61 +489,53 @@ function toggleAutoPlay() {
 async function startAutoPlay() {
   isAutoPlaying = true;
   autoPlayAbort = new AbortController();
-  autoPlayBtn.textContent = '⏹ stop';
+  autoPlayBtn.textContent = 'stop';
   autoPlayBtn.classList.add('cute');
   stepBtn.disabled = true;
 
   const signal = autoPlayAbort.signal;
-
   let consecutiveErrors = 0;
 
   while (isAutoPlaying && currentGameId) {
     try {
-      const response = await fetch(`${API_BASE}/game/${currentGameId}/step`, {
+      const response = await fetch(`${API_BASE}/game/${currentGameId}/step?stream=1`, {
         method: 'POST',
         signal
       });
 
       if (!isAutoPlaying) break;
 
-      const data = await response.json();
+      if (response.body && response.headers.get('content-type')?.includes('text/event-stream')) {
+        await consumeSSEStream(response);
+        consecutiveErrors = 0;
+      } else {
+        const data = await response.json();
 
-      if (data.stepInProgress) {
-        // Step already running, wait and retry
-        await new Promise(r => setTimeout(r, 2000));
-        continue;
-      }
-
-      if (data.error) {
-        consecutiveErrors++;
-        console.error(`Auto step error (${consecutiveErrors}):`, data.error, data.details);
-        logError(`API error (attempt ${consecutiveErrors})`, data.details || data.error);
-        if (consecutiveErrors >= 5) {
-          logError('Giving up', 'Too many consecutive errors');
-          break;
+        if (data.stepInProgress) {
+          await new Promise(r => setTimeout(r, 2000));
+          continue;
         }
-        // Wait longer between retries
-        await new Promise(r => setTimeout(r, 3000 * consecutiveErrors));
-        continue;
+
+        if (data.error) {
+          consecutiveErrors++;
+          logError(`API error (attempt ${consecutiveErrors})`, data.details || data.error);
+          if (consecutiveErrors >= 5) { logError('Giving up', 'Too many consecutive errors'); break; }
+          await new Promise(r => setTimeout(r, 3000 * consecutiveErrors));
+          continue;
+        }
+
+        consecutiveErrors = 0;
+        renderGameState(data);
       }
 
-      consecutiveErrors = 0;
-      renderGameState(data);
+      if (previousState?.phase === 'finished') break;
 
-      if (data.phase === 'finished') {
-        break;
-      }
-
-      // Brief pause between steps for animation breathing room
       await new Promise(r => setTimeout(r, 600));
     } catch (error) {
       if (error.name === 'AbortError') break;
       consecutiveErrors++;
       console.error(`Auto step failed (${consecutiveErrors}):`, error);
-      if (consecutiveErrors >= 5) {
-        logError('Giving up', 'Too many consecutive network errors');
-        break;
-      }
+      if (consecutiveErrors >= 5) { logError('Giving up', 'Too many network errors'); break; }
       logError(`Network error (attempt ${consecutiveErrors})`, error.message);
       await new Promise(r => setTimeout(r, 3000 * consecutiveErrors));
     }
@@ -544,7 +546,7 @@ async function startAutoPlay() {
 
 function stopAutoPlay() {
   isAutoPlaying = false;
-  autoPlayBtn.textContent = '▶ auto';
+  autoPlayBtn.textContent = 'auto';
   autoPlayBtn.classList.remove('cute');
   stepBtn.disabled = false;
 
@@ -554,17 +556,105 @@ function stopAutoPlay() {
   }
 }
 
+// ─── SSE Stream Handling ──────────────────────────────────────────────
+
+async function consumeSSEStream(response) {
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+
+  try {
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop();
+
+      let eventType = null;
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (trimmed.startsWith('event: ')) {
+          eventType = trimmed.slice(7);
+        } else if (trimmed.startsWith('data: ') && eventType) {
+          try {
+            const data = JSON.parse(trimmed.slice(6));
+            handleSSEEvent(eventType, data);
+          } catch (e) {
+            console.warn('SSE parse error:', trimmed);
+          }
+          eventType = null;
+        }
+      }
+    }
+  } catch (error) {
+    if (error.name === 'AbortError') return;
+    throw error;
+  }
+}
+
+function handleSSEEvent(eventType, data) {
+  switch (eventType) {
+    case 'thinking': {
+      const playerIndex = previousState?.players?.findIndex(p => p.id === data.playerId);
+      if (playerIndex != null && playerIndex >= 0) {
+        clearStreamText();
+        const streamEl = document.getElementById(`stream-${playerIndex}`);
+        if (streamEl) {
+          streamEl.textContent = '';
+          streamEl.classList.add('active');
+        }
+      }
+      break;
+    }
+    case 'token': {
+      const activeStream = document.querySelector('.stream-text.active');
+      if (activeStream) {
+        activeStream.textContent += data.text;
+        activeStream.scrollTop = activeStream.scrollHeight;
+      }
+      break;
+    }
+    case 'complete': {
+      clearStreamText();
+      renderGameState(data);
+      break;
+    }
+    case 'error': {
+      clearStreamText();
+      logError(data.error || 'Stream error', data.details);
+      break;
+    }
+    case 'blocked': {
+      console.log('Step already in progress');
+      break;
+    }
+  }
+}
+
+function clearStreamText() {
+  document.querySelectorAll('.stream-text').forEach(el => {
+    el.classList.remove('active');
+    setTimeout(() => {
+      if (!el.classList.contains('active')) el.textContent = '';
+    }, 300);
+  });
+}
+
 function logError(title, detail) {
   const entry = document.createElement('div');
   entry.className = 'turn-entry';
-  entry.innerHTML = `<div class="turn-line" style="color: #ff6b6b;">❌ ${title}</div>` +
+  entry.innerHTML = `<div class="turn-line" style="color: #ff6b6b;">x ${title}</div>` +
     (detail ? `<div class="turn-thought" style="color: #ff6b6b;">${detail}</div>` : '');
   thoughtLog.insertBefore(entry, thoughtLog.firstChild);
-  gamePhaseDisplay.textContent = '❌ error — check log';
+  gamePhaseDisplay.textContent = 'error — check log';
 }
 
+// ─── Render Game State ───────────────────────────────────────────────
+
 function renderGameState(state) {
-  // ── Diff previous state to detect events ──
+  // Diff previous state to detect events
   const prevTurnCount = previousState?.turns?.length || 0;
   const newTurnCount = state.turns?.length || 0;
   const newTurn = newTurnCount > prevTurnCount ? state.turns[newTurnCount - 1] : null;
@@ -574,16 +664,14 @@ function renderGameState(state) {
   const pendingJustAppeared = !hadPending && hasPending;
   const pendingJustResolved = hadPending && !hasPending && newTurn;
 
-  // Determine which player played and find their DOM position
   let activePlayerIndex = null;
   const playerId = newTurn?.playerId || state.pendingTurn?.playerId;
   if (playerId) {
     activePlayerIndex = state.players.findIndex(p => p.id === playerId);
   }
 
-  // ── Sound effects + BS callouts based on state diff ──
+  // Sound effects + BS callouts
   if (pendingJustAppeared) {
-    // Cards just played — play card sound and fly cards to pending area
     SoundFX.playCard();
     if (activePlayerIndex !== null && activePlayerIndex >= 0) {
       const handEl = document.querySelector(`.player-hand[data-hand="${activePlayerIndex}"]`);
@@ -598,13 +686,11 @@ function renderGameState(state) {
     if (newTurn.challenged) {
       SoundFX.challenge();
       const challengerIndex = state.players.findIndex(p => p.id === newTurn.challengerId);
-      const challengerEl = document.querySelector(`.player-info[data-player="${challengerIndex}"]`);
-      showChallengeCallout(challengerEl, newTurn.challengeCorrect);
-
-      // Flip cards face-up in pending area, then animate to destination
+      // Use the column element for callout positioning
+      const challengerCol = document.querySelector(`.player-column[data-column="${challengerIndex}"]`);
+      showChallengeCallout(challengerCol, newTurn.challengeCorrect);
       flipPendingCards(newTurn, state);
     } else {
-      // No challenge — flip cards and send to pile
       flipPendingCards(newTurn, state);
     }
   }
@@ -613,12 +699,14 @@ function renderGameState(state) {
     setTimeout(() => SoundFX.win(), 300);
   }
 
-  // ── Update players ──
+  // Update column states
+  clearColumnStates();
   const thinkingId = state.thinkingPlayerId || null;
 
   state.players.forEach((player, i) => {
     const infoEl = document.querySelector(`.player-info[data-player="${i}"]`);
     const handEl = document.querySelector(`.player-hand[data-hand="${i}"]`);
+    const column = document.querySelector(`.player-column[data-column="${i}"]`);
 
     if (infoEl) {
       infoEl.querySelector('.player-name').textContent = shortenModelName(player.modelId);
@@ -633,24 +721,36 @@ function renderGameState(state) {
       infoEl.classList.toggle('challenging', isThinking && isChallengePhase);
       infoEl.classList.toggle('winner', isWinner);
 
-      // Update status label
+      // Column-level state classes
+      if (column) {
+        column.classList.toggle('is-thinking', isThinking && !isChallengePhase);
+        column.classList.toggle('is-challenging', isThinking && isChallengePhase);
+        column.classList.toggle('is-winner', isWinner);
+      }
+
+      // Status label
       const statusEl = infoEl.querySelector('.player-status');
       if (statusEl) {
         if (isWinner) {
-          statusEl.textContent = '🏆 winner!';
+          statusEl.textContent = 'winner';
           statusEl.className = 'player-status';
+          statusEl.style.color = 'var(--mint)';
         } else if (isThinking && isChallengePhase) {
-          statusEl.textContent = '🤔 judging...';
+          statusEl.textContent = 'judging...';
           statusEl.className = 'player-status status-challenging';
+          statusEl.style.color = '';
         } else if (isThinking && !isChallengePhase) {
-          statusEl.textContent = '💭 thinking...';
+          statusEl.textContent = 'thinking...';
           statusEl.className = 'player-status status-thinking';
+          statusEl.style.color = '';
         } else if (player.isActive && isChallengePhase) {
-          statusEl.textContent = '😬 awaiting verdict';
+          statusEl.textContent = 'awaiting verdict';
           statusEl.className = 'player-status status-challenging';
+          statusEl.style.color = '';
         } else {
           statusEl.textContent = '';
           statusEl.className = 'player-status';
+          statusEl.style.color = '';
         }
       }
     }
@@ -674,17 +774,15 @@ function renderGameState(state) {
   }
   document.querySelector('.pile-count').textContent = pileSize;
 
-  // Update pending cards (face-down during challenge phase)
+  // Update pending cards
   if (hasPending && !pendingJustResolved) {
     renderPendingCards(state.pendingTurn);
   } else if (!hasPending) {
-    // Clear pending area (unless flipPendingCards is animating — it cleans up itself)
     if (!pendingJustResolved) {
       pendingDisplay.innerHTML = '';
     }
   }
 
-  // Show pending turn reasoning immediately when it appears
   if (pendingJustAppeared && state.pendingTurn) {
     renderPendingTurnLog(state.pendingTurn, state.players);
   }
@@ -692,21 +790,21 @@ function renderGameState(state) {
   // Update current rank
   currentRankDisplay.textContent = state.currentRank || 'A';
 
-  // Update phase display with model names
+  // Update phase display
   if (state.phase === 'finished') {
-    gamePhaseDisplay.innerHTML = '🎉 game over!';
+    gamePhaseDisplay.innerHTML = 'game over';
   } else if (state.phase === 'waiting' && thinkingId) {
     const thinkingPlayer = state.players.find(p => p.id === thinkingId);
     const name = shortenModelName(thinkingPlayer?.modelId);
-    gamePhaseDisplay.innerHTML = `<span class="phase-model">${name}</span><span class="phase-action">choosing cards to play...</span>`;
+    gamePhaseDisplay.innerHTML = `<span class="phase-model">${name}</span><span class="phase-action">choosing cards...</span>`;
   } else if (state.phase === 'challenging' && thinkingId) {
     const thinkingPlayer = state.players.find(p => p.id === thinkingId);
     const name = shortenModelName(thinkingPlayer?.modelId);
-    gamePhaseDisplay.innerHTML = `<span class="phase-model">${name}</span><span class="phase-action">deciding whether to call BS...</span>`;
+    gamePhaseDisplay.innerHTML = `<span class="phase-model">${name}</span><span class="phase-action">calling BS?</span>`;
   } else if (state.phase === 'challenging') {
-    gamePhaseDisplay.innerHTML = '⚡ challenge phase...';
+    gamePhaseDisplay.innerHTML = 'challenge phase...';
   } else {
-    gamePhaseDisplay.innerHTML = '🎯 waiting for play...';
+    gamePhaseDisplay.innerHTML = 'waiting for play...';
   }
 
   // Update turn log
@@ -720,11 +818,10 @@ function renderGameState(state) {
     showWinner(winner);
   }
 
-  // Save for next diff
   previousState = JSON.parse(JSON.stringify(state));
 }
 
-// ─── Pending Cards (face-down / flip reveal) ─────────────────────────
+// ─── Pending Cards ───────────────────────────────────────────────────
 
 function renderPendingCards(pendingTurn) {
   if (!pendingTurn) {
@@ -732,7 +829,6 @@ function renderPendingCards(pendingTurn) {
     return;
   }
 
-  // Only re-render if the pending display is empty (avoid re-rendering on every state update)
   if (pendingDisplay.children.length > 0) return;
 
   const cardCount = pendingTurn.actualCards?.length || pendingTurn.claimedCount || 1;
@@ -745,12 +841,10 @@ function renderPendingCards(pendingTurn) {
     const inner = document.createElement('div');
     inner.className = 'pending-card-inner';
 
-    // Back face (visible by default)
     const back = document.createElement('div');
     back.className = 'pending-card-back';
     back.innerHTML = window.CardRenderer.getCardBackSVG();
 
-    // Front face (hidden, shown on flip)
     const front = document.createElement('div');
     front.className = 'pending-card-front';
     if (actualCards[i]) {
@@ -796,41 +890,35 @@ function flipPendingCards(resolvedTurn, state) {
     return;
   }
 
-  // Flip all cards face-up with stagger
   cards.forEach((card, i) => {
     setTimeout(() => card.classList.add('flipped'), i * 100);
   });
 
-  // After flip completes, animate cards to destination then clean up
   const flipDuration = 500 + (cards.length - 1) * 100;
 
   setTimeout(() => {
     if (resolvedTurn.challenged) {
-      // Fly cards to the loser
       const loserId = resolvedTurn.challengeCorrect ? resolvedTurn.playerId : resolvedTurn.challengerId;
       const loserIndex = state.players.findIndex(p => p.id === loserId);
       const loserHand = document.querySelector(`.player-hand[data-hand="${loserIndex}"]`);
       const loserInfo = document.querySelector(`.player-info[data-player="${loserIndex}"]`);
       const loserEl = loserHand || loserInfo;
-      // Fly pending cards + pile cards to loser
       const totalCards = Math.min(cards.length + (previousState?.pileSize || 0), 6);
       animateCardsToTarget(pendingDisplay, loserEl, totalCards, () => {
         pendingDisplay.innerHTML = '';
       });
     } else {
-      // Fly cards to pile
       animateCardsToTarget(pendingDisplay, pileDisplay, cards.length, () => {
         pendingDisplay.innerHTML = '';
       });
     }
   }, flipDuration + 200);
 
-  // Remove pending entry from thought log and replace with final entry
   const pendingEntry = thoughtLog.querySelector('.pending-entry');
   if (pendingEntry) pendingEntry.remove();
 }
 
-// ─── Minimal Turn Log ────────────────────────────────────────────────
+// ─── Turn Log ────────────────────────────────────────────────────────
 
 function renderTurnLog(turns, players) {
   const existingCount = thoughtLog.querySelectorAll('.turn-entry').length;
@@ -866,7 +954,7 @@ function renderTurnLog(turns, players) {
       const challengerName = shortenModelName(challenger?.modelId);
       const resultClass = turn.challengeCorrect ? 'challenge-correct' : 'challenge-wrong';
       const resultText = turn.challengeCorrect ? 'caught it!' : 'wrong call!';
-      html += `<div class="challenge-line ${resultClass}">⚡ ${challengerName} called BS — ${resultText}</div>`;
+      html += `<div class="challenge-line ${resultClass}">${challengerName} called BS — ${resultText}</div>`;
 
       if (turn.challengeReasoning) {
         const shortened = turn.challengeReasoning.length > 120
@@ -885,14 +973,12 @@ function showWinner(player) {
   winnerName.textContent = shortenModelName(player?.modelId);
   winnerOverlay.style.display = 'flex';
 
-  // Disable controls
   stopAutoPlay();
   autoPlayBtn.disabled = true;
   stepBtn.disabled = true;
   newGameBtn.disabled = false;
 }
 
-// Close winner overlay and reset
 document.querySelector('.winner-overlay .btn').addEventListener('click', () => {
   winnerOverlay.style.display = 'none';
   currentGameId = null;

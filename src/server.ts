@@ -70,6 +70,20 @@ function sendJSON(res: http.ServerResponse, data: any, status = 200) {
   res.end(JSON.stringify(data));
 }
 
+// SSE helpers for streaming
+function startSSE(res: http.ServerResponse) {
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    'Connection': 'keep-alive',
+    'Access-Control-Allow-Origin': '*',
+  });
+}
+
+function sendSSE(res: http.ServerResponse, event: string, data: any) {
+  res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+}
+
 // Serve static files
 function serveStatic(res: http.ServerResponse, filepath: string) {
   const ext = path.extname(filepath);
@@ -160,25 +174,29 @@ async function handleStartGame(req: http.IncomingMessage, res: http.ServerRespon
 }
 
 // Advance the game by one step
-async function handleNextStep(res: http.ServerResponse, gameId: string) {
+async function handleNextStep(res: http.ServerResponse, gameId: string, stream = false) {
   const game = activeGames.get(gameId);
   if (!game) {
-    sendJSON(res, { error: 'Game not found' }, 404);
+    if (stream) { startSSE(res); sendSSE(res, 'error', { error: 'Game not found' }); res.end(); }
+    else sendJSON(res, { error: 'Game not found' }, 404);
     return;
   }
 
   if (game.phase === 'finished') {
-    sendJSON(res, getFullGameState(game));
+    if (stream) { startSSE(res); sendSSE(res, 'complete', getFullGameState(game)); res.end(); }
+    else sendJSON(res, getFullGameState(game));
     return;
   }
 
   if (game.stepInProgress) {
     console.log(`[step] BLOCKED — step already in progress for ${gameId}`);
-    sendJSON(res, { ...getFullGameState(game), stepInProgress: true });
+    if (stream) { startSSE(res); sendSSE(res, 'blocked', { stepInProgress: true }); res.end(); }
+    else sendJSON(res, { ...getFullGameState(game), stepInProgress: true });
     return;
   }
 
   game.stepInProgress = true;
+  if (stream) startSSE(res);
 
   try {
     // Phase: waiting -> playing (get play decision)
@@ -198,13 +216,17 @@ async function handleNextStep(res: http.ServerResponse, gameId: string) {
         recentTurns: game.state.turns.slice(-5),
       };
 
+      if (stream) sendSSE(res, 'thinking', { playerId: currentPlayer.id, modelId: currentPlayer.modelId, type: 'play' });
+
       console.log(`[step]   Calling ${currentPlayer.modelId} for play decision...`);
       const startTime = Date.now();
+      const onToken = stream ? (text: string) => sendSSE(res, 'token', { text }) : undefined;
       const playResponse = await game.adapter.getPlayDecision(
         currentPlayer.id,
         currentPlayer.modelId,
         visibleState,
-        game.state.experimentId
+        game.state.experimentId,
+        onToken
       );
       console.log(`[step]   Response in ${Date.now() - startTime}ms — plays ${playResponse.cards_to_play.join(', ')} (claims ${playResponse.claim_count})`);
 
@@ -270,6 +292,7 @@ async function handleNextStep(res: http.ServerResponse, gameId: string) {
         const currentPlayer = getCurrentPlayer(game.state);
 
         console.log(`[step]   Asking ${challenger.modelId} whether to challenge...`);
+        if (stream) sendSSE(res, 'thinking', { playerId: challenger.id, modelId: challenger.modelId, type: 'challenge' });
 
         const visibleState = {
           hand: challenger.hand,
@@ -284,6 +307,7 @@ async function handleNextStep(res: http.ServerResponse, gameId: string) {
         };
 
         const startTime = Date.now();
+        const onToken = stream ? (text: string) => sendSSE(res, 'token', { text }) : undefined;
         const challengeResponse = await game.adapter.getChallengeDecision(
           challenger.id,
           challenger.modelId,
@@ -293,7 +317,8 @@ async function handleNextStep(res: http.ServerResponse, gameId: string) {
             claimedCount: game.pendingTurn.claimedCount,
             claimedRank: game.pendingTurn.claimedRank,
           },
-          game.state.experimentId
+          game.state.experimentId,
+          onToken
         );
         console.log(`[step]   Response in ${Date.now() - startTime}ms — ${challengeResponse.challenge ? 'CHALLENGE!' : 'pass'}`);
 
@@ -328,11 +353,16 @@ async function handleNextStep(res: http.ServerResponse, gameId: string) {
     }
 
     game.stepInProgress = false;
-    sendJSON(res, getFullGameState(game));
+    if (stream) { sendSSE(res, 'complete', getFullGameState(game)); res.end(); }
+    else sendJSON(res, getFullGameState(game));
   } catch (error) {
     game.stepInProgress = false;
     console.error('[step] ERROR:', error);
-    sendJSON(res, { error: 'Step failed', details: String(error) }, 500);
+    if (stream && !res.writableEnded) {
+      try { sendSSE(res, 'error', { error: 'Step failed', details: String(error) }); res.end(); } catch {}
+    } else if (!stream) {
+      sendJSON(res, { error: 'Step failed', details: String(error) }, 500);
+    }
   }
 }
 
@@ -565,7 +595,8 @@ const server = http.createServer(async (req, res) => {
         handleGetGameState(res, gameId);
       } else if (apiPath.match(/^\/game\/[^/]+\/step$/) && req.method === 'POST') {
         const gameId = apiPath.split('/')[2];
-        await handleNextStep(res, gameId);
+        const stream = parsedUrl.query.stream === '1';
+        await handleNextStep(res, gameId, stream);
       } else if (apiPath.match(/^\/game\/[^/]+\/auto$/) && req.method === 'POST') {
         const gameId = apiPath.split('/')[2];
         const steps = parseInt(parsedUrl.query.steps as string) || 1;

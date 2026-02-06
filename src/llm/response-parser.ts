@@ -195,23 +195,3 @@ function normalizeCardString(card: string): string | null {
   return null;
 }
 
-/**
- * Creates a fallback play response (plays first card, claims it's the required rank)
- */
-export function createFallbackPlayResponse(hand: string[], requiredRank: string): PlayTurnResponse {
-  return {
-    reasoning: 'Fallback response due to parsing failure',
-    cards_to_play: [hand[0]],
-    claim_count: 1,
-  };
-}
-
-/**
- * Creates a fallback challenge response (don't challenge)
- */
-export function createFallbackChallengeResponse(): ChallengeResponse {
-  return {
-    reasoning: 'Fallback response due to parsing failure',
-    challenge: false,
-  };
-}

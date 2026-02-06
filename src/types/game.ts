@@ -134,12 +134,23 @@ export const RANKS: Rank[] = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10',
 export const SUITS: Suit[] = ['H', 'D', 'C', 'S'];
 
 export const MODELS = [
-  'zai-org/GLM-4.7',
-  'deepseek-ai/DeepSeek-V3.2',
-  'moonshotai/Kimi-K2.5',
-  'MiniMaxAI/MiniMax-M2',
-  'XiaomiMiMo/MiMo-V2-Flash',
   'openai/gpt-oss-120b',
+  'google/gemma-3-27b-it',
+  'moonshotai/Kimi-K2-Instruct',
+  // Llama models disabled — waiting for ACE approval
+  // 'meta-llama/Llama-3.1-70B-Instruct',
+  // 'meta-llama/Meta-Llama-3-70B-Instruct',
+  // 'meta-llama/Llama-3.3-70B-Instruct',
+  'Qwen/Qwen3-Coder-480B-A35B-Instruct',
+  'Qwen/Qwen2.5-72B-Instruct',
+  'Qwen/Qwen2.5-32B-Instruct',
+  'Qwen/Qwen2-72B-Instruct',
+  'mistralai/Mistral-Small-3.2-24B-Instruct-2506',
+  'Qwen/Qwen3-32B',
+  'Qwen/Qwen3-235B-A22B',
+  'dphn/Dolphin-Mistral-24B-Venice-Edition',
+  'featherless-ai/QRWKV-72B',
+  'NousResearch/Hermes-4-70B',
 ] as const;
 
 export type ModelId = typeof MODELS[number];

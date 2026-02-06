@@ -16,7 +16,8 @@ export interface LLMAdapter {
     playerId: string,
     modelId: string,
     visibleState: ReturnType<typeof getVisibleState>,
-    experimentId: number
+    experimentId: number,
+    onToken?: (text: string) => void
   ): Promise<PlayTurnResponse>;
 
   getChallengeDecision(
@@ -24,7 +25,8 @@ export interface LLMAdapter {
     modelId: string,
     visibleState: ReturnType<typeof getVisibleState>,
     lastPlay: { playerId: string; claimedCount: number; claimedRank: string },
-    experimentId: number
+    experimentId: number,
+    onToken?: (text: string) => void
   ): Promise<ChallengeResponse>;
 }
 
