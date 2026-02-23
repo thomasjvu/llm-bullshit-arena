@@ -470,50 +470,341 @@ const winnerName = document.getElementById('winner-name');
 const thoughtModal = document.getElementById('thought-modal');
 const logToggleBtn = document.getElementById('log-toggle-btn');
 const logCloseBtn = document.getElementById('log-close-btn');
+const roundNumberDisplay = document.getElementById('round-number');
+const turnQueueDisplay = document.getElementById('turn-queue');
 
 // ─── Theme Application ──────────────────────────────────────────────
 
 function applyModelThemes(players) {
-  players.forEach((player, i) => {
-    const theme = window.ModelThemes.getTheme(player.modelId);
-    const column = document.querySelector(`.player-column[data-column="${i}"]`);
-    if (!column) return;
-
-    // Set column accent color as CSS custom property
-    column.style.setProperty('--col-accent', theme.accent);
-    column.style.setProperty('--col-accent-bright', theme.accentBright);
-
-    // Apply background
-    const bgEl = column.querySelector('.column-bg');
-    if (bgEl) {
-      bgEl.style.background = theme.bg;
-      // Add pattern overlay if available
-      if (theme.patternSVG) {
-        const encoded = encodeURIComponent(theme.patternSVG);
-        bgEl.style.backgroundImage = bgEl.style.background;
-        bgEl.style.background = `url("data:image/svg+xml,${encoded}"), ${theme.bg}`;
-      }
-    }
-
-    // Insert character SVG
+  const cacheBust = Date.now();
+  
+  // Apply to other-players columns (0, 1, 2)
+  for (let i = 0; i < 3; i++) {
+    if (!players[i]) continue;
+    const player = players[i];
     const charEl = document.getElementById(`char-${i}`);
     if (charEl) {
-      charEl.innerHTML = theme.character();
+      const imageHtml = window.ModelThemes.getCharacterImage(player.modelId, 'default', cacheBust);
+      if (imageHtml) {
+        charEl.innerHTML = imageHtml;
+      }
     }
-
-    // Set character title
     const titleEl = document.getElementById(`title-${i}`);
     if (titleEl) {
+      const theme = window.ModelThemes.getTheme(player.modelId);
       titleEl.textContent = theme.title;
-      titleEl.style.color = theme.accent;
+      titleEl.style.color = '#000000';
     }
-  });
+  }
+  
+  // Apply to active column
+  if (players[3]) {
+    const player = players[3];
+    const charEl = document.getElementById('char-active');
+    if (charEl) {
+      const imageHtml = window.ModelThemes.getCharacterImage(player.modelId, 'default', cacheBust);
+      if (imageHtml) {
+        charEl.innerHTML = imageHtml;
+      }
+    }
+    const titleEl = document.getElementById('title-active');
+    if (titleEl) {
+      const theme = window.ModelThemes.getTheme(player.modelId);
+      titleEl.textContent = theme.title;
+      titleEl.style.color = '#000000';
+    }
+  }
+}
+
+// ─── Active Player Swap ────────────────────────────────────────────
+
+function swapActivePlayer(state) {
+  const currentPlayerIndex = state.currentPlayerIndex;
+  const players = state.players;
+  if (!players || players.length < 4) return;
+  
+  const cacheBust = Date.now();
+  
+  // Get current player (who should be in active column)
+  const currentPlayer = players[currentPlayerIndex];
+  if (!currentPlayer) return;
+  
+  // Move current player to active column
+  const activeColumn = document.querySelector('.player-column.active-column');
+  if (activeColumn) {
+    const activeCharEl = activeColumn.querySelector('.character-image');
+    const activeTitleEl = activeColumn.querySelector('.character-title');
+    const activeInfoEl = activeColumn.querySelector('.player-info');
+    const activeHandEl = activeColumn.querySelector('.player-hand');
+    
+    if (activeCharEl) {
+      activeCharEl.id = 'char-active';
+      activeCharEl.innerHTML = window.ModelThemes.getCharacterImage(currentPlayer.modelId, 'default', cacheBust) || '';
+    }
+    if (activeTitleEl) {
+      activeTitleEl.id = 'title-active';
+      const theme = window.ModelThemes.getTheme(currentPlayer.modelId);
+      activeTitleEl.textContent = theme.title;
+      activeTitleEl.style.color = '#000000';
+    }
+    if (activeInfoEl) {
+      activeInfoEl.dataset.player = 'active';
+    }
+    if (activeHandEl) {
+      activeHandEl.dataset.hand = 'active';
+    }
+    
+    // Copy player info
+    if (activeInfoEl) {
+      activeInfoEl.querySelector('.player-name').textContent = shortenModelName(currentPlayer.modelId);
+      activeInfoEl.querySelector('.card-count span').textContent = currentPlayer.handSize;
+    }
+  }
+  
+  // Move other 3 players to the stack
+  let otherIndex = 0;
+  for (let i = 0; i < players.length; i++) {
+    if (i === currentPlayerIndex) continue;
+    if (otherIndex >= 3) break;
+    
+    const player = players[i];
+    const column = document.querySelector(`.other-players-column .player-column[data-column="${otherIndex}"]`);
+    if (!column) continue;
+    
+    const charEl = column.querySelector('.character-image');
+    const titleEl = column.querySelector('.character-title');
+    const infoEl = column.querySelector('.player-info');
+    const handEl = column.querySelector('.player-hand');
+    
+    if (charEl) {
+      charEl.id = `char-${otherIndex}`;
+      charEl.innerHTML = window.ModelThemes.getCharacterImage(player.modelId, 'default', cacheBust) || '';
+    }
+    if (titleEl) {
+      titleEl.id = `title-${otherIndex}`;
+      const theme = window.ModelThemes.getTheme(player.modelId);
+      titleEl.textContent = theme.title;
+      titleEl.style.color = '#000000';
+    }
+    if (infoEl) {
+      infoEl.dataset.player = otherIndex;
+      infoEl.querySelector('.player-name').textContent = shortenModelName(player.modelId);
+      infoEl.querySelector('.card-count span').textContent = player.handSize;
+    }
+    if (handEl) {
+      handEl.dataset.hand = otherIndex;
+    }
+    
+    otherIndex++;
+  }
 }
 
 function clearColumnStates() {
   document.querySelectorAll('.player-column').forEach(col => {
-    col.classList.remove('is-thinking', 'is-challenging', 'is-winner', 'is-eliminated');
+    col.classList.remove('is-thinking', 'is-challenging', 'is-winner', 'is-eliminated', 'is-accused', 'is-challenger');
   });
+}
+
+function updateCharacterImage(playerIndex, player, state) {
+  // Handle 'active' column (current player in large column)
+  if (playerIndex === 'active') {
+    const charEl = document.getElementById('char-active');
+    if (!charEl) return;
+    
+    const modelId = player.modelId;
+    const cacheBust = Date.now();
+    
+    let imageState = 'default';
+    const isWinner = state.winner === player.id;
+    const isThinking = player.id === state.thinkingPlayerId;
+    
+    if (isWinner) {
+      imageState = 'win';
+    } else if (player.isEliminated) {
+      imageState = 'lose';
+    } else if (state.phase === 'challenging' && state.pendingTurn) {
+      const accusedPlayerIndex = state.players.findIndex(p => p.id === state.pendingTurn.playerId);
+      const currentPlayerIndex = state.players.findIndex(p => p.id === state.currentPlayerId);
+      
+      if (currentPlayerIndex === accusedPlayerIndex) {
+        imageState = 'judged';
+      } else if (isThinking) {
+        imageState = 'thinking';
+      }
+    } else if (isThinking) {
+      imageState = 'judging';
+    }
+    
+    const imageHtml = window.ModelThemes.getCharacterImage(modelId, imageState, cacheBust);
+    if (imageHtml) {
+      charEl.innerHTML = imageHtml;
+    }
+    return;
+  }
+  
+  const charEl = document.getElementById(`char-${playerIndex}`);
+  if (!charEl) return;
+
+  const modelId = player.modelId;
+  const cacheBust = Date.now();
+  
+  let imageState = 'default';
+  
+  const isWinner = state.winner === player.id;
+  const isThinking = player.id === state.thinkingPlayerId;
+  
+  if (isWinner) {
+    imageState = 'win';
+  } else if (player.isEliminated) {
+    imageState = 'lose';
+  } else if (state.phase === 'challenging' && state.pendingTurn) {
+    const accusedPlayerIndex = state.players.findIndex(p => p.id === state.pendingTurn.playerId);
+    const thinkingPlayerId = state.thinkingPlayerId;
+    
+    if (playerIndex === accusedPlayerIndex) {
+      imageState = 'judged';
+    } else if (thinkingPlayerId === player.id) {
+      imageState = 'thinking';
+    } else {
+      imageState = 'default';
+    }
+  } else if (isThinking) {
+    imageState = 'judging';
+  }
+  
+  const imageHtml = window.ModelThemes.getCharacterImage(modelId, imageState, cacheBust);
+  if (imageHtml) {
+    charEl.innerHTML = imageHtml;
+  }
+}
+
+function clearJudgingIndicators() {
+  document.querySelectorAll('.judging-indicator').forEach(el => {
+    el.classList.remove('visible');
+  });
+}
+
+function showJudgingIndicator(playerIndex, type) {
+  const indicatorId = type === 'accused' ? `judging-${playerIndex}` : `judging-challenger-${playerIndex}`;
+  const indicator = document.getElementById(indicatorId);
+  if (indicator) {
+    indicator.classList.add('visible');
+  }
+  
+  const column = document.querySelector(`.player-column[data-column="${playerIndex}"]`);
+  if (column) {
+    column.classList.add(type === 'accused' ? 'is-accused' : 'is-challenger');
+  }
+}
+
+// ─── Speech Bubble System ────────────────────────────────────────────
+
+function showSpeechBubble(playerIndex, text, type = 'default', duration = 3000) {
+  const speechEl = document.getElementById(`speech-${playerIndex}`);
+  if (!speechEl) return;
+  
+  const contentEl = speechEl.querySelector('.speech-content');
+  contentEl.textContent = text;
+  
+  speechEl.className = 'speech-bubble visible';
+  if (type === 'challenge') {
+    speechEl.classList.add('challenge-bubble');
+  } else if (type === 'play') {
+    speechEl.classList.add('play-bubble');
+  }
+  
+  // Clear any existing timeout
+  if (speechEl._timeout) {
+    clearTimeout(speechEl._timeout);
+  }
+  
+  // Auto-hide after duration
+  speechEl._timeout = setTimeout(() => {
+    speechEl.classList.remove('visible');
+  }, duration);
+}
+
+function hideAllSpeechBubbles() {
+  document.querySelectorAll('.speech-bubble').forEach(el => {
+    el.classList.remove('visible');
+  });
+}
+
+// ─── Round Counter ───────────────────────────────────────────────────
+
+function updateRoundCounter(turnNumber) {
+  if (roundNumberDisplay) {
+    roundNumberDisplay.textContent = turnNumber || 1;
+    
+    // Add a quick animation effect
+    roundNumberDisplay.style.transform = 'scale(1.3)';
+    setTimeout(() => {
+      roundNumberDisplay.style.transform = 'scale(1)';
+    }, 200);
+  }
+}
+
+// ─── Turn Order Timeline ─────────────────────────────────────────────
+
+function updateTurnQueue(state) {
+  if (!turnQueueDisplay || !state.players) return;
+  
+  const currentPlayerIndex = state.currentPlayerIndex;
+  const players = state.players;
+  const isChallengePhase = state.phase === 'challenging';
+  const thinkingPlayerId = state.thinkingPlayerId;
+  
+  // Determine who is "current" based on phase
+  // During challenge phase, the challenger is being queried, so they're "current"
+  // During waiting/playing phase, the currentPlayerIndex is "current"
+  let currentIndex = currentPlayerIndex;
+  if (isChallengePhase && thinkingPlayerId) {
+    const thinkingIndex = players.findIndex(p => p.id === thinkingPlayerId);
+    if (thinkingIndex >= 0) {
+      currentIndex = thinkingIndex;
+    }
+  }
+  
+  // Build queue: current + next 3 players (skipping eliminated)
+  const queue = [];
+  let idx = currentIndex;
+  
+  for (let i = 0; i < Math.min(4, players.length); i++) {
+    // Find next non-eliminated player
+    let attempts = 0;
+    while (attempts < players.length) {
+      const player = players[idx];
+      if (!player.isEliminated) {
+        queue.push({
+          playerIndex: idx,
+          player: player,
+          isCurrent: i === 0,
+          isChallenge: isChallengePhase && i === 0
+        });
+        idx = (idx + 1) % players.length;
+        break;
+      }
+      idx = (idx + 1) % players.length;
+      attempts++;
+    }
+    if (attempts >= players.length) break;
+  }
+  
+  // Render queue
+  turnQueueDisplay.innerHTML = queue.map((item, i) => {
+    const name = shortenModelName(item.player.modelId);
+    const thumbnail = window.ModelThemes.getThumbnail(item.player.modelId);
+    const isLast = i === queue.length - 1;
+    const challengeIndicator = item.isChallenge ? ' 🔍' : '';
+    
+    return `
+      <div class="turn-queue-item ${item.isCurrent ? 'current' : 'upcoming'}" title="${item.isChallenge ? 'Deciding whether to challenge' : (item.isCurrent ? 'Current turn' : 'Upcoming')}">
+        <img class="turn-queue-avatar" src="${thumbnail}" alt="${name}" />
+        <div class="turn-queue-name">${name}${challengeIndicator}</div>
+      </div>
+      ${!isLast ? '<div class="turn-queue-arrow">→</div>' : ''}
+    `;
+  }).join('');
 }
 
 // Helpers
@@ -571,6 +862,12 @@ async function startNewGame() {
     if (data.players) {
       applyModelThemes(data.players);
     }
+
+    // Initialize round counter and turn queue
+    if (roundNumberDisplay) {
+      roundNumberDisplay.textContent = '1';
+    }
+    updateTurnQueue(data);
 
     // Render state and animate deal
     renderGameState(data);
@@ -652,9 +949,18 @@ async function startAutoPlay() {
 
         if (data.error) {
           consecutiveErrors++;
-          logError(`API error (attempt ${consecutiveErrors})`, data.details || data.error);
+          // Check if adapter was reset and provide better message
+          if (data.resetAdapter) {
+            logError('API connection reset', 'Connection was unstable and has been reset. Retrying...');
+            // Give the adapter a moment to stabilize
+            await new Promise(r => setTimeout(r, 5000));
+          } else {
+            logError(`API error (attempt ${consecutiveErrors})`, data.details || data.error);
+          }
           if (consecutiveErrors >= 5) { logError('Giving up', 'Too many consecutive errors'); break; }
-          await new Promise(r => setTimeout(r, 3000 * consecutiveErrors));
+          if (!data.resetAdapter) {
+            await new Promise(r => setTimeout(r, 3000 * consecutiveErrors));
+          }
           continue;
         }
 
@@ -845,9 +1151,11 @@ function logError(title, detail) {
 
 function renderGameState(state) {
   // Diff previous state to detect events
-  const prevTurnCount = previousState?.turns?.length || 0;
-  const newTurnCount = state.turns?.length || 0;
-  const newTurn = newTurnCount > prevTurnCount ? state.turns[newTurnCount - 1] : null;
+  // Use totalTurns if available (server limits turns sent for performance)
+  const prevTurnCount = previousState?.totalTurns || previousState?.turns?.length || 0;
+  const newTurnCount = state.totalTurns || state.turns?.length || 0;
+  const turnsArray = state.turns || [];
+  const newTurn = newTurnCount > prevTurnCount ? turnsArray[turnsArray.length - 1] : null;
 
   const hadPending = previousState?.pendingTurn != null;
   const hasPending = state.pendingTurn != null;
@@ -860,11 +1168,30 @@ function renderGameState(state) {
     activePlayerIndex = state.players.findIndex(p => p.id === playerId);
   }
 
+  // Swap active player to large column
+  if (activePlayerIndex !== null && activePlayerIndex >= 0) {
+    swapActivePlayer(state);
+  }
+
+  // Update round counter - use totalTurns if available (server sends limited turns for performance)
+  const currentTurnNumber = state.totalTurns || state.turns?.length || 0;
+  const prevTurnNumber = previousState?.totalTurns || previousState?.turns?.length || 0;
+  if (currentTurnNumber > 0 && (!previousState || prevTurnNumber !== currentTurnNumber)) {
+    updateRoundCounter(currentTurnNumber + 1);
+  }
+
+  // Update turn order timeline
+  updateTurnQueue(state);
+
   // Show structured play/challenge actions in player columns
   if (pendingJustAppeared && state.pendingTurn) {
     clearAllActions();
+    hideAllSpeechBubbles();
     if (activePlayerIndex !== null && activePlayerIndex >= 0) {
       showPlayAction(activePlayerIndex, state.pendingTurn.claimedCount, state.pendingTurn.claimedRank, state.pendingTurn.reasoning);
+      // Show speech bubble for play
+      const claimText = `Playing ${state.pendingTurn.claimedCount} ${state.pendingTurn.claimedRank}'s`;
+      showSpeechBubble(activePlayerIndex, claimText, 'play');
     }
   }
 
@@ -879,6 +1206,8 @@ function renderGameState(state) {
       const challengerIdx = state.players.findIndex(p => p.id === newTurn.challengerId);
       if (challengerIdx >= 0) {
         showChallengeAction(challengerIdx, true, newTurn.challengeReasoning);
+        // Show speech bubble for challenge
+        showSpeechBubble(challengerIdx, "I call BS!", 'challenge');
       }
     }
   }
@@ -914,7 +1243,22 @@ function renderGameState(state) {
 
   // Update column states
   clearColumnStates();
+  clearJudgingIndicators();
   const thinkingId = state.thinkingPlayerId || null;
+  
+  // Determine judging state during challenge phase
+  let accusedPlayerIndex = null;
+  let challengerPlayerIndex = null;
+  
+  if (state.phase === 'challenging' && state.pendingTurn) {
+    // The player who just played is being judged
+    accusedPlayerIndex = state.players.findIndex(p => p.id === state.pendingTurn.playerId);
+  }
+  
+  if (state.phase === 'challenging' && thinkingId) {
+    // The thinking player is the challenger
+    challengerPlayerIndex = state.players.findIndex(p => p.id === thinkingId);
+  }
 
   state.players.forEach((player, i) => {
     const infoEl = document.querySelector(`.player-info[data-player="${i}"]`);
@@ -928,8 +1272,10 @@ function renderGameState(state) {
       const isThinking = player.id === thinkingId;
       const isChallengePhase = state.phase === 'challenging';
       const isWinner = state.winner === player.id;
+      const isAccused = i === accusedPlayerIndex;
+      const isChallenger = i === challengerPlayerIndex;
 
-      infoEl.classList.toggle('active', player.isActive && !isThinking);
+      infoEl.classList.toggle('active', player.isActive && !isThinking && !isChallengePhase);
       infoEl.classList.toggle('thinking', isThinking && !isChallengePhase);
       infoEl.classList.toggle('challenging', isThinking && isChallengePhase);
       infoEl.classList.toggle('winner', isWinner);
@@ -939,6 +1285,19 @@ function renderGameState(state) {
         column.classList.toggle('is-thinking', isThinking && !isChallengePhase);
         column.classList.toggle('is-challenging', isThinking && isChallengePhase);
         column.classList.toggle('is-winner', isWinner);
+        column.classList.toggle('is-accused', isAccused);
+        column.classList.toggle('is-challenger', isChallenger);
+      }
+
+      // Update character image based on state
+      updateCharacterImage(i, player, state);
+      
+      // Show judging indicators
+      if (isAccused && isChallengePhase) {
+        showJudgingIndicator(i, 'accused');
+      }
+      if (isChallenger && isChallengePhase) {
+        showJudgingIndicator(i, 'challenger');
       }
 
       // Status label
@@ -948,10 +1307,14 @@ function renderGameState(state) {
           statusEl.textContent = 'winner';
           statusEl.className = 'player-status';
           statusEl.style.color = 'var(--mint)';
-        } else if (isThinking && isChallengePhase) {
+        } else if (isChallenger && isChallengePhase) {
           statusEl.textContent = 'judging...';
           statusEl.className = 'player-status status-challenging';
           statusEl.style.color = '';
+        } else if (isAccused && isChallengePhase) {
+          statusEl.textContent = 'being judged!';
+          statusEl.className = 'player-status';
+          statusEl.style.color = 'var(--pink)';
         } else if (isThinking && !isChallengePhase) {
           statusEl.textContent = 'thinking...';
           statusEl.className = 'player-status status-thinking';
@@ -1003,17 +1366,19 @@ function renderGameState(state) {
   // Update current rank
   currentRankDisplay.textContent = state.currentRank || 'A';
 
-  // Update phase display
+  // Update phase display with clearer messaging
   if (state.phase === 'finished') {
     gamePhaseDisplay.innerHTML = 'game over';
   } else if (state.phase === 'waiting' && thinkingId) {
     const thinkingPlayer = state.players.find(p => p.id === thinkingId);
     const name = shortenModelName(thinkingPlayer?.modelId);
-    gamePhaseDisplay.innerHTML = `<span class="phase-model">${name}</span><span class="phase-action">choosing cards...</span>`;
-  } else if (state.phase === 'challenging' && thinkingId) {
+    gamePhaseDisplay.innerHTML = `<span class="phase-model">${name}</span><span class="phase-action">is playing...</span>`;
+  } else if (state.phase === 'challenging' && thinkingId && state.pendingTurn) {
     const thinkingPlayer = state.players.find(p => p.id === thinkingId);
-    const name = shortenModelName(thinkingPlayer?.modelId);
-    gamePhaseDisplay.innerHTML = `<span class="phase-model">${name}</span><span class="phase-action">calling BS?</span>`;
+    const accusedPlayer = state.players.find(p => p.id === state.pendingTurn.playerId);
+    const challengerName = shortenModelName(thinkingPlayer?.modelId);
+    const accusedName = shortenModelName(accusedPlayer?.modelId);
+    gamePhaseDisplay.innerHTML = `<span class="phase-model">${challengerName}</span><span class="phase-action">judging ${accusedName}'s play...</span>`;
   } else if (state.phase === 'challenging') {
     gamePhaseDisplay.innerHTML = 'challenge phase...';
   } else {

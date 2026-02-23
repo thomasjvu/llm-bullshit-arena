@@ -2,10 +2,10 @@
 // Rounder, friendlier card designs
 
 const SUITS = {
-  H: { name: 'heart', color: '#f5a9b8', darkColor: '#e8889a' },
-  D: { name: 'diamond', color: '#f5d0a9', darkColor: '#e8b88a' },
-  C: { name: 'club', color: '#9eecd9', darkColor: '#7dd4c4' },
-  S: { name: 'spade', color: '#b0b0c4', darkColor: '#8888a0' }
+  H: { name: 'heart', color: '#000000', darkColor: '#000000' },
+  D: { name: 'diamond', color: '#000000', darkColor: '#000000' },
+  C: { name: 'club', color: '#000000', darkColor: '#000000' },
+  S: { name: 'spade', color: '#000000', darkColor: '#000000' }
 };
 
 // Cute rounded suit patterns (10x10)
@@ -204,18 +204,18 @@ function createCardSVG(rank, suit) {
   svg += `<defs>
     <linearGradient id="cardBg${rank}${suit}" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" style="stop-color:#ffffff"/>
-      <stop offset="100%" style="stop-color:#f4f4f6"/>
+      <stop offset="100%" style="stop-color:#ffffff"/>
     </linearGradient>
     <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
-      <feDropShadow dx="0" dy="1" stdDeviation="1" flood-color="#000" flood-opacity="0.1"/>
+      <feDropShadow dx="2" dy="2" stdDeviation="0" flood-color="#000" flood-opacity="0.3"/>
     </filter>
   </defs>`;
 
   // Card base with very rounded corners
-  svg += `<rect x="2" y="2" width="${width - 4}" height="${height - 4}" fill="url(#cardBg${rank}${suit})" rx="8" ry="8" filter="url(#softShadow)"/>`;
+  svg += `<rect x="2" y="2" width="${width - 4}" height="${height - 4}" fill="url(#cardBg${rank}${suit})" rx="2" ry="2" filter="url(#softShadow)"/>`;
 
   // Soft border
-  svg += `<rect x="2" y="2" width="${width - 4}" height="${height - 4}" fill="none" stroke="${color}" stroke-width="2" rx="8" ry="8" opacity="0.5"/>`;
+  svg += `<rect x="2" y="2" width="${width - 4}" height="${height - 4}" fill="none" stroke="#000000" stroke-width="2" rx="2" ry="2" opacity="1"/>`;
 
   // Corner rank (top-left)
   const rankPattern = RANK_PATTERNS[rank];
@@ -257,35 +257,30 @@ function createCardBackSVG() {
   // Gradient background
   svg += `<defs>
     <linearGradient id="backGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#282830"/>
-      <stop offset="50%" style="stop-color:#18181e"/>
-      <stop offset="100%" style="stop-color:#282830"/>
+      <stop offset="0%" style="stop-color:#ffffff"/>
+      <stop offset="50%" style="stop-color:#ffffff"/>
+      <stop offset="100%" style="stop-color:#ffffff"/>
     </linearGradient>
     <pattern id="dots" x="0" y="0" width="8" height="8" patternUnits="userSpaceOnUse">
-      <circle cx="4" cy="4" r="1.5" fill="#9a9ab0" opacity="0.3"/>
+      <circle cx="4" cy="4" r="1" fill="#000000" opacity="0.2"/>
     </pattern>
   </defs>`;
 
   // Card base
-  svg += `<rect x="2" y="2" width="${width - 4}" height="${height - 4}" fill="url(#backGrad)" rx="8" ry="8"/>`;
+  svg += `<rect x="2" y="2" width="${width - 4}" height="${height - 4}" fill="url(#backGrad)" rx="2" ry="2" stroke="#000000" stroke-width="2"/>`;
 
   // Dot pattern
-  svg += `<rect x="6" y="6" width="${width - 12}" height="${height - 12}" fill="url(#dots)" rx="4"/>`;
+  svg += `<rect x="6" y="6" width="${width - 12}" height="${height - 12}" fill="url(#dots)" rx="2"/>`;
 
   // Border decorations
-  svg += `<rect x="4" y="4" width="${width - 8}" height="${height - 8}" fill="none" stroke="#9a9ab0" stroke-width="1.5" rx="6" opacity="0.4"/>`;
-  svg += `<rect x="8" y="8" width="${width - 16}" height="${height - 16}" fill="none" stroke="#9a9ab0" stroke-width="1" rx="4" stroke-dasharray="4 2" opacity="0.3"/>`;
+  svg += `<rect x="4" y="4" width="${width - 8}" height="${height - 8}" fill="none" stroke="#000000" stroke-width="1.5" rx="2"/>`;
+  svg += `<rect x="8" y="8" width="${width - 16}" height="${height - 16}" fill="none" stroke="#000000" stroke-width="1" rx="2" stroke-dasharray="4 2"/>`;
 
-  // Center decoration - cute star
+  // Center decoration - X pattern
   const cx = width / 2;
   const cy = height / 2;
-  svg += `<polygon points="${cx},${cy - 8} ${cx + 3},${cy - 2} ${cx + 9},${cy - 2} ${cx + 4},${cy + 2} ${cx + 6},${cy + 8} ${cx},${cy + 5} ${cx - 6},${cy + 8} ${cx - 4},${cy + 2} ${cx - 9},${cy - 2} ${cx - 3},${cy - 2}" fill="#9a9ab0" opacity="0.5"/>`;
-
-  // Corner sparkles
-  svg += `<circle cx="12" cy="12" r="2" fill="#f5a9b8" opacity="0.5"/>`;
-  svg += `<circle cx="${width - 12}" cy="12" r="2" fill="#9eecd9" opacity="0.5"/>`;
-  svg += `<circle cx="12" cy="${height - 12}" r="2" fill="#9eecd9" opacity="0.5"/>`;
-  svg += `<circle cx="${width - 12}" cy="${height - 12}" r="2" fill="#f5a9b8" opacity="0.5"/>`;
+  svg += `<line x1="${cx - 8}" y1="${cy - 12}" x2="${cx + 8}" y2="${cy + 12}" stroke="#000000" stroke-width="2"/>`;
+  svg += `<line x1="${cx + 8}" y1="${cy - 12}" x2="${cx - 8}" y2="${cy + 12}" stroke="#000000" stroke-width="2"/>`;
 
   svg += '</svg>';
   return svg;

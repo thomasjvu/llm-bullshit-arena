@@ -5,7 +5,7 @@ window.ModelThemes = (() => {
 
   const themes = {
 
-    'google/gemma-3-27b-it': {
+    'unsloth/gemma-3-27b-it': {
       name: 'Gemma-3-27B',
       shortName: 'Gemma',
       title: 'THE GEM',
@@ -107,120 +107,7 @@ window.ModelThemes = (() => {
           <!-- Subtle moon glow ring -->
           <circle cx="75" cy="75" r="38" stroke="#e0d0ff" stroke-width="0.5" fill="none" opacity="0.15"/>
         </svg>`;
-      }
-    },
-
-    'meta-llama/Llama-3.1-70B-Instruct': {
-      name: 'Llama-3.1-70B',
-      shortName: 'Llama3.1',
-      title: 'THE LLAMA',
-      accent: '#e67e22',
-      accentBright: '#f0a050',
-      accentDim: '#a05510',
-      secondary: '#f5c48a',
-      bg: [
-        'radial-gradient(ellipse at 50% 30%, rgba(230,126,34,0.12) 0%, transparent 55%)',
-        'radial-gradient(ellipse at 30% 75%, rgba(245,196,138,0.06) 0%, transparent 40%)',
-        'linear-gradient(180deg, #140c04 0%, #1e1208 35%, #160e05 70%, #0d0803 100%)',
-      ].join(', '),
-      patternSVG: `<svg width="60" height="60" xmlns="http://www.w3.org/2000/svg"><circle cx="15" cy="15" r="2" fill="rgba(230,126,34,0.03)"/><circle cx="45" cy="45" r="1.5" fill="rgba(230,126,34,0.03)"/></svg>`,
-      character() {
-        return `<svg viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="80" cy="80" r="72" fill="rgba(230,126,34,0.12)"/>
-          <circle cx="80" cy="80" r="56" stroke="#e67e22" stroke-width="1.2" fill="none" opacity="0.15"/>
-          <!-- Llama head silhouette -->
-          <ellipse cx="80" cy="85" rx="28" ry="32" fill="#e67e22" opacity="0.8"/>
-          <!-- Ears -->
-          <ellipse cx="62" cy="48" rx="6" ry="16" fill="#f0a050" opacity="0.85" transform="rotate(-15 62 48)"/>
-          <ellipse cx="98" cy="48" rx="6" ry="16" fill="#f0a050" opacity="0.85" transform="rotate(15 98 48)"/>
-          <ellipse cx="62" cy="50" rx="3" ry="10" fill="#140c04" opacity="0.4" transform="rotate(-15 62 50)"/>
-          <ellipse cx="98" cy="50" rx="3" ry="10" fill="#140c04" opacity="0.4" transform="rotate(15 98 50)"/>
-          <!-- Eyes -->
-          <ellipse cx="72" cy="78" rx="4" ry="4.5" fill="#f5c48a" opacity="0.9"/>
-          <ellipse cx="88" cy="78" rx="4" ry="4.5" fill="#f5c48a" opacity="0.9"/>
-          <circle cx="72" cy="78" r="2" fill="#140c04"/>
-          <circle cx="88" cy="78" r="2" fill="#140c04"/>
-          <!-- Nose -->
-          <ellipse cx="80" cy="92" rx="6" ry="4" fill="#a05510" opacity="0.5"/>
-          <circle cx="77" cy="92" r="1.5" fill="#140c04" opacity="0.4"/>
-          <circle cx="83" cy="92" r="1.5" fill="#140c04" opacity="0.4"/>
-          <!-- Mouth -->
-          <path d="M75 98 Q80 102 85 98" stroke="#a05510" stroke-width="1" fill="none" opacity="0.5"/>
-          <!-- Neck fluff -->
-          <path d="M58 105 Q65 115 72 108 Q78 118 85 108 Q92 118 100 105" stroke="#f0a050" stroke-width="1.5" fill="none" opacity="0.4"/>
-        </svg>`;
-      }
-    },
-
-    'meta-llama/Meta-Llama-3-70B-Instruct': {
-      name: 'Llama-3-70B',
-      shortName: 'Llama3',
-      title: 'THE ELDER',
-      accent: '#cc5500',
-      accentBright: '#ee7722',
-      accentDim: '#883300',
-      secondary: '#e8a060',
-      bg: [
-        'radial-gradient(ellipse at 45% 35%, rgba(204,85,0,0.12) 0%, transparent 55%)',
-        'radial-gradient(ellipse at 65% 70%, rgba(232,160,96,0.06) 0%, transparent 40%)',
-        'linear-gradient(180deg, #120804 0%, #1a0e06 35%, #140a04 70%, #0a0502 100%)',
-      ].join(', '),
-      patternSVG: `<svg width="70" height="70" xmlns="http://www.w3.org/2000/svg"><path d="M10 60 L20 50 L30 60" stroke="rgba(204,85,0,0.03)" fill="none"/><path d="M40 20 L50 10 L60 20" stroke="rgba(204,85,0,0.03)" fill="none"/></svg>`,
-      character() {
-        return `<svg viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="80" cy="80" r="72" fill="rgba(204,85,0,0.1)"/>
-          <circle cx="80" cy="80" r="56" stroke="#cc5500" stroke-width="1" fill="none" opacity="0.15"/>
-          <!-- Shield shape -->
-          <path d="M80 30 L115 50 L115 95 Q115 120 80 135 Q45 120 45 95 L45 50 Z" fill="#cc5500" opacity="0.2" stroke="#cc5500" stroke-width="1.5" opacity="0.4"/>
-          <!-- Inner shield -->
-          <path d="M80 42 L105 57 L105 92 Q105 112 80 124 Q55 112 55 92 L55 57 Z" fill="none" stroke="#ee7722" stroke-width="0.8" opacity="0.3"/>
-          <!-- Roman numeral III -->
-          <text x="80" y="92" text-anchor="middle" font-family="serif" font-size="36" font-weight="bold" fill="#ee7722" opacity="0.75">III</text>
-          <!-- Stars above -->
-          <circle cx="68" cy="48" r="2" fill="#e8a060" opacity="0.5"/>
-          <circle cx="80" cy="44" r="2.5" fill="#e8a060" opacity="0.6"/>
-          <circle cx="92" cy="48" r="2" fill="#e8a060" opacity="0.5"/>
-        </svg>`;
-      }
-    },
-
-    'meta-llama/Llama-3.3-70B-Instruct': {
-      name: 'Llama-3.3-70B',
-      shortName: 'Llama3.3',
-      title: 'THE HERD',
-      accent: '#f0a030',
-      accentBright: '#ffcc55',
-      accentDim: '#aa7020',
-      secondary: '#ffe0a0',
-      bg: [
-        'radial-gradient(ellipse at 55% 25%, rgba(240,160,48,0.12) 0%, transparent 55%)',
-        'radial-gradient(ellipse at 40% 80%, rgba(255,224,160,0.05) 0%, transparent 35%)',
-        'linear-gradient(180deg, #140f04 0%, #1e1608 35%, #161005 70%, #0d0a03 100%)',
-      ].join(', '),
-      patternSVG: `<svg width="80" height="80" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="60" r="1" fill="rgba(240,160,48,0.04)"/><circle cx="60" cy="20" r="1.5" fill="rgba(240,160,48,0.03)"/></svg>`,
-      character() {
-        return `<svg viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="80" cy="80" r="72" fill="rgba(240,160,48,0.1)"/>
-          <circle cx="80" cy="80" r="56" stroke="#f0a030" stroke-width="1" fill="none" opacity="0.15"/>
-          <!-- Stylized double llama -->
-          <ellipse cx="68" cy="82" rx="22" ry="26" fill="#f0a030" opacity="0.6"/>
-          <ellipse cx="92" cy="82" rx="22" ry="26" fill="#f0a030" opacity="0.45"/>
-          <!-- Ears - front llama -->
-          <ellipse cx="56" cy="52" rx="5" ry="13" fill="#ffcc55" opacity="0.7" transform="rotate(-12 56 52)"/>
-          <ellipse cx="78" cy="52" rx="5" ry="13" fill="#ffcc55" opacity="0.7" transform="rotate(8 78 52)"/>
-          <!-- Ears - back llama -->
-          <ellipse cx="100" cy="54" rx="4" ry="11" fill="#aa7020" opacity="0.5" transform="rotate(12 100 54)"/>
-          <!-- Eyes front -->
-          <circle cx="62" cy="76" r="3" fill="#ffe0a0" opacity="0.9"/>
-          <circle cx="74" cy="76" r="3" fill="#ffe0a0" opacity="0.9"/>
-          <circle cx="62" cy="76" r="1.5" fill="#140f04"/>
-          <circle cx="74" cy="76" r="1.5" fill="#140f04"/>
-          <!-- Nose front -->
-          <ellipse cx="68" cy="90" rx="5" ry="3" fill="#aa7020" opacity="0.4"/>
-          <!-- 3.3 version text -->
-          <text x="80" y="125" text-anchor="middle" font-family="monospace" font-size="10" fill="#f0a030" opacity="0.35">3.3</text>
-        </svg>`;
-      }
+      },
     },
 
     'Qwen/Qwen3-Coder-480B-A35B-Instruct': {
@@ -252,7 +139,7 @@ window.ModelThemes = (() => {
           <!-- Cursor blink -->
           <rect x="78" y="72" width="2" height="16" fill="#a47aff" opacity="0.5"/>
         </svg>`;
-      }
+      },
     },
 
     'Qwen/Qwen2.5-72B-Instruct': {
@@ -289,7 +176,7 @@ window.ModelThemes = (() => {
           <circle cx="92" cy="108" r="6" fill="#3366ff" opacity="0.4"/>
           <circle cx="92" cy="108" r="3" fill="#88aaff" opacity="0.3"/>
         </svg>`;
-      }
+      },
     },
 
     'Qwen/Qwen2.5-32B-Instruct': {
@@ -318,10 +205,110 @@ window.ModelThemes = (() => {
           <circle cx="90" cy="62" r="2.5" fill="#77ccee" opacity="0.9"/>
           <circle cx="90" cy="62" r="1" fill="#040c14"/>
         </svg>`;
-      }
+      },
     },
 
-    'Qwen/Qwen2-72B-Instruct': {
+    'Qwen/Qwen3-32B': {
+      name: 'Qwen3-32B',
+      shortName: 'Q3-32B',
+      title: 'THE FALCON',
+      accent: '#ff6b35',
+      accentBright: '#ff8d5a',
+      accentDim: '#cc5429',
+      secondary: '#ffb380',
+      bg: [
+        'radial-gradient(ellipse at 50% 35%, rgba(255,107,53,0.12) 0%, transparent 55%)',
+        'radial-gradient(ellipse at 35% 70%, rgba(255,179,128,0.06) 0%, transparent 40%)',
+        'linear-gradient(180deg, #140a04 0%, #1e1208 35%, #160e05 70%, #0d0603 100%)',
+      ].join(', '),
+      patternSVG: `<svg width="60" height="60" xmlns="http://www.w3.org/2000/svg"><path d="M10 30 Q30 15 50 30" stroke="rgba(255,107,53,0.03)" fill="none"/><path d="M10 50 Q30 35 50 50" stroke="rgba(255,107,53,0.025)" fill="none"/></svg>`,
+      character() {
+        return `<svg viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="80" cy="80" r="72" fill="rgba(255,107,53,0.1)"/>
+          <circle cx="80" cy="80" r="56" stroke="#ff6b35" stroke-width="1" fill="none" opacity="0.15"/>
+          <!-- Falcon silhouette -->
+          <path d="M60 55 L70 45 L100 55 L95 65 L110 60 L115 70 L105 75 L115 85 L100 80 L90 90 L85 120 L65 120 L70 90 L60 80 L55 90 L60 100 L50 95 L55 85 L50 90 L50 100 L42 95 L48 85 L43 90 L45 80 L35 75 L45 70 L40 75 L40 65 L50 60 L55 55 Z" fill="#ff6b35" opacity="0.7"/>
+          <!-- Eye -->
+          <circle cx="75" cy="58" r="2" fill="#ffb380" opacity="0.9"/>
+          <circle cx="75" cy="58" r="0.8" fill="#140a04"/>
+          <!-- Wing details -->
+          <path d="M60 80 Q75 85 90 90 Q80 95 70 90 Z" fill="#ff8d5a" opacity="0.3"/>
+        </svg>`;
+      },
+    },
+
+    'Qwen/Qwen3-Next-80B-A3B-Instruct': {
+      name: 'Qwen3-Next-80B',
+      shortName: 'Q3-Next',
+      title: 'THE GRAND',
+      accent: '#9944ff',
+      accentBright: '#bb66ff',
+      accentDim: '#7722dd',
+      secondary: '#cc99ff',
+      bg: [
+        'radial-gradient(ellipse at 50% 30%, rgba(153,68,255,0.12) 0%, transparent 55%)',
+        'radial-gradient(ellipse at 65% 75%, rgba(204,153,255,0.06) 0%, transparent 40%)',
+        'linear-gradient(180deg, #0a0414 0%, #100820 35%, #0c0618 70%, #06030e 100%)',
+      ].join(', '),
+      patternSVG: `<svg width="70" height="70" xmlns="http://www.w3.org/2000/svg"><circle cx="35" cy="35" r="25" stroke="rgba(153,68,255,0.025)" fill="none"/><circle cx="35" cy="35" r="12" stroke="rgba(153,68,255,0.03)" fill="none"/></svg>`,
+      character() {
+        return `<svg viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="80" cy="80" r="72" fill="rgba(153,68,255,0.1)"/>
+          <circle cx="80" cy="80" r="56" stroke="#9944ff" stroke-width="1" fill="none" opacity="0.15"/>
+          <!-- Grand throne -->
+          <rect x="45" y="55" width="70" height="50" fill="#9944ff" opacity="0.3"/>
+          <rect x="40" y="50" width="80" height="10" rx="2" fill="#bb66ff" opacity="0.5"/>
+          <rect x="35" y="45" width="90" height="8" rx="2" fill="#9944ff" opacity="0.4"/>
+          <rect x="45" y="103" width="70" height="10" rx="2" fill="#bb66ff" opacity="0.5"/>
+          <rect x="50" y="111" width="60" height="8" rx="2" fill="#9944ff" opacity="0.4"/>
+          <!-- Backrest pillars -->
+          <rect x="55" y="35" width="8" height="25" fill="#bb66ff" opacity="0.4"/>
+          <rect x="97" y="35" width="8" height="25" fill="#bb66ff" opacity="0.4"/>
+          <!-- Seat cushion -->
+          <ellipse cx="80" cy="75" rx="25" ry="10" fill="#cc99ff" opacity="0.3"/>
+          <!-- Next numeral -->
+          <text x="80" y="90" text-anchor="middle" font-family="serif" font-size="28" font-weight="bold" fill="#cc99ff" opacity="0.5">Ⅲ</text>
+        </svg>`;
+      },
+    },
+
+    'nousresearch/Hermes-4.3-36B': {
+      name: 'Hermes-4.3-36B',
+      shortName: 'Hermes',
+      title: 'THE MESSENGER',
+      accent: '#f59e0b',
+      accentBright: '#fbbf24',
+      accentDim: '#d97706',
+      secondary: '#fcd34d',
+      bg: [
+        'radial-gradient(ellipse at 55% 30%, rgba(245,158,11,0.12) 0%, transparent 55%)',
+        'radial-gradient(ellipse at 40% 75%, rgba(252,211,77,0.05) 0%, transparent 35%)',
+        'linear-gradient(180deg, #140d04 0%, #1e1608 35%, #161005 70%, #0d0a03 100%)',
+      ].join(', '),
+      patternSVG: `<svg width="60" height="60" xmlns="http://www.w3.org/2000/svg"><path d="M10 30 Q30 20 50 30" stroke="rgba(245,158,11,0.03)" fill="none"/><circle cx="20" cy="55" r="1" fill="rgba(245,158,11,0.02)"/></svg>`,
+      character() {
+        return `<svg viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="80" cy="80" r="72" fill="rgba(245,158,11,0.1)"/>
+          <circle cx="80" cy="80" r="56" stroke="#f59e0b" stroke-width="1" fill="none" opacity="0.15"/>
+          <!-- Winged sandals -->
+          <ellipse cx="55" cy="115" rx="18" ry="8" fill="#f59e0b" opacity="0.6"/>
+          <ellipse cx="105" cy="115" rx="18" ry="8" fill="#f59e0b" opacity="0.6"/>
+          <!-- Wings -->
+          <path d="M40 115 Q25 100 30 85 Q35 95 40 105 Z" fill="#fbbf24" opacity="0.5"/>
+          <path d="M120 115 Q135 100 130 85 Q125 95 120 105 Z" fill="#fbbf24" opacity="0.5"/>
+          <!-- Body/wand hint -->
+          <line x1="74" y1="70" x2="86" y2="130" stroke="#fcd34d" stroke-width="3" opacity="0.4"/>
+          <circle cx="80" cy="65" r="6" fill="#fcd34d" opacity="0.5"/>
+          <circle cx="80" cy="65" r="3" fill="#f59e0b" opacity="0.6"/>
+          <!-- Trail -->
+          <path d="M80 50 Q70 40 60 35 Q75 38 85 35 Q90 42 80 50Z" fill="#fbbf24" opacity="0.3"/>
+          <!-- Hermes reference -->
+          <text x="80" y="145" text-anchor="middle" font-family="serif" font-size="8" fill="#f59e0b" opacity="0.4">4.3</text>
+        </svg>`;
+      },
+    },
+
+    'Qwen/Qwen2.5-32B-Instruct': {
       name: 'Qwen2-72B',
       shortName: 'Qwen2',
       title: 'THE ANCIENT',
@@ -354,10 +341,10 @@ window.ModelThemes = (() => {
           <!-- Numeral -->
           <text x="80" y="90" text-anchor="middle" font-family="serif" font-size="24" font-weight="bold" fill="#9988dd" opacity="0.5">II</text>
         </svg>`;
-      }
+      },
     },
 
-    'mistralai/Mistral-Small-3.2-24B-Instruct-2506': {
+    'chutesai/Mistral-Small-3.2-24B-Instruct-2506': {
       name: 'Mistral-Small-3.2',
       shortName: 'Mistral',
       title: 'THE WIND',
@@ -387,7 +374,7 @@ window.ModelThemes = (() => {
           <circle cx="125" cy="90" r="1.5" fill="#8899bb" opacity="0.3"/>
           <circle cx="25" cy="80" r="1.5" fill="#8899bb" opacity="0.3"/>
         </svg>`;
-      }
+      },
     },
 
     'dphn/Dolphin-Mistral-24B-Venice-Edition': {
@@ -430,143 +417,45 @@ window.ModelThemes = (() => {
           <circle cx="125" cy="78" r="1.2" fill="#7fffd4" opacity="0.3"/>
         </svg>`;
       }
-    },
-
-    'featherless-ai/QRWKV-72B': {
-      name: 'QRWKV-72B',
-      shortName: 'QRWKV',
-      title: 'THE RAVEN',
-      accent: '#cc3333',
-      accentBright: '#ee5555',
-      accentDim: '#881818',
-      secondary: '#ff8888',
-      bg: [
-        'radial-gradient(ellipse at 50% 30%, rgba(204,51,51,0.12) 0%, transparent 55%)',
-        'radial-gradient(ellipse at 40% 75%, rgba(255,136,136,0.06) 0%, transparent 40%)',
-        'linear-gradient(180deg, #140404 0%, #200808 35%, #180606 70%, #0e0303 100%)',
-      ].join(', '),
-      patternSVG: `<svg width="70" height="70" xmlns="http://www.w3.org/2000/svg"><path d="M15 55 L35 35 L55 55" stroke="rgba(204,51,51,0.03)" fill="none"/></svg>`,
-      character() {
-        return `<svg viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="80" cy="80" r="72" fill="rgba(204,51,51,0.1)"/>
-          <circle cx="80" cy="80" r="56" stroke="#cc3333" stroke-width="1" fill="none" opacity="0.15"/>
-          <!-- Raven silhouette -->
-          <path d="M50 90 Q45 70 55 55 Q65 42 80 40 Q95 42 105 55 Q110 62 108 72 L120 58 L115 72 Q118 80 110 90 Q100 105 80 108 Q60 105 50 90Z" fill="#cc3333" opacity="0.7"/>
-          <!-- Wing -->
-          <path d="M50 90 Q35 80 25 85 Q30 78 42 75 Q38 68 30 65 Q40 62 50 68" fill="#881818" opacity="0.5"/>
-          <!-- Beak -->
-          <path d="M108 72 L128 68 L115 78Z" fill="#ee5555" opacity="0.8"/>
-          <!-- Eye -->
-          <circle cx="100" cy="58" r="4" fill="#ff8888" opacity="0.9"/>
-          <circle cx="100" cy="58" r="2" fill="#140404"/>
-          <circle cx="99" cy="57" r="1" fill="#ffffff" opacity="0.3"/>
-          <!-- Tail feathers -->
-          <path d="M50 90 Q38 95 28 100" stroke="#cc3333" stroke-width="1.5" fill="none" opacity="0.4"/>
-          <path d="M52 92 Q40 100 32 108" stroke="#cc3333" stroke-width="1.2" fill="none" opacity="0.3"/>
-        </svg>`;
-      }
-    },
-
-    'NousResearch/Hermes-4-70B': {
-      name: 'Hermes-4-70B',
-      shortName: 'Hermes',
-      title: 'THE MESSENGER',
-      accent: '#d4af37',
-      accentBright: '#f0cc55',
-      accentDim: '#997a20',
-      secondary: '#ffe680',
-      bg: [
-        'radial-gradient(ellipse at 50% 30%, rgba(212,175,55,0.12) 0%, transparent 55%)',
-        'radial-gradient(ellipse at 60% 75%, rgba(255,230,128,0.06) 0%, transparent 40%)',
-        'linear-gradient(180deg, #120e04 0%, #1c1608 35%, #141006 70%, #0a0803 100%)',
-      ].join(', '),
-      patternSVG: `<svg width="60" height="60" xmlns="http://www.w3.org/2000/svg"><path d="M20 10 L30 5 L40 10" stroke="rgba(212,175,55,0.04)" fill="none"/><path d="M20 50 L30 45 L40 50" stroke="rgba(212,175,55,0.03)" fill="none"/></svg>`,
-      character() {
-        return `<svg viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="80" cy="80" r="72" fill="rgba(212,175,55,0.1)"/>
-          <circle cx="80" cy="80" r="56" stroke="#d4af37" stroke-width="1" fill="none" opacity="0.15"/>
-          <!-- Winged helmet -->
-          <ellipse cx="80" cy="72" rx="24" ry="28" fill="#d4af37" opacity="0.3"/>
-          <!-- Helmet dome -->
-          <path d="M56 72 Q56 44 80 44 Q104 44 104 72" fill="#d4af37" opacity="0.5"/>
-          <!-- Helmet brim -->
-          <ellipse cx="80" cy="72" rx="28" ry="6" fill="#f0cc55" opacity="0.4"/>
-          <!-- Left wing -->
-          <path d="M52 62 Q38 48 30 35 Q36 50 40 55 Q32 42 25 32 Q34 48 42 58" fill="#d4af37" opacity="0.6"/>
-          <!-- Right wing -->
-          <path d="M108 62 Q122 48 130 35 Q124 50 120 55 Q128 42 135 32 Q126 48 118 58" fill="#d4af37" opacity="0.6"/>
-          <!-- Face opening -->
-          <ellipse cx="80" cy="78" rx="16" ry="12" fill="#120e04" opacity="0.5"/>
-          <!-- Eyes in shadow -->
-          <circle cx="74" cy="76" r="2.5" fill="#ffe680" opacity="0.7"/>
-          <circle cx="86" cy="76" r="2.5" fill="#ffe680" opacity="0.7"/>
-          <!-- Caduceus hint below -->
-          <line x1="80" y1="95" x2="80" y2="125" stroke="#d4af37" stroke-width="1.5" opacity="0.3"/>
-          <path d="M75 102 Q80 98 85 102 Q80 106 75 102" stroke="#f0cc55" stroke-width="0.8" fill="none" opacity="0.3"/>
-          <path d="M75 112 Q80 108 85 112 Q80 116 75 112" stroke="#f0cc55" stroke-width="0.8" fill="none" opacity="0.3"/>
-        </svg>`;
-      }
-    },
-
-    'openai/gpt-oss-120b': {
-      name: 'gpt-oss-120b',
-      shortName: 'gpt-oss',
-      title: 'THE ORACLE',
-      accent: '#00ff88',
-      accentBright: '#66ffaa',
-      accentDim: '#009955',
-      secondary: '#00cc66',
-      bg: [
-        'radial-gradient(ellipse at 50% 40%, rgba(0,255,136,0.1) 0%, transparent 55%)',
-        'radial-gradient(ellipse at 60% 80%, rgba(0,204,102,0.05) 0%, transparent 35%)',
-        'linear-gradient(180deg, #040d08 0%, #081a10 35%, #06140c 70%, #030a06 100%)',
-      ].join(', '),
-      patternSVG: `<svg width="50" height="50" xmlns="http://www.w3.org/2000/svg"><text x="5" y="15" font-family="monospace" font-size="8" fill="rgba(0,255,136,0.03)">01</text><text x="25" y="35" font-family="monospace" font-size="8" fill="rgba(0,255,136,0.02)">10</text><text x="10" y="48" font-family="monospace" font-size="8" fill="rgba(0,255,136,0.025)">11</text></svg>`,
-      character() {
-        return `<svg viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <radialGradient id="gp-glow" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stop-color="#00ff88" stop-opacity="0.25"/>
-              <stop offset="70%" stop-color="#00ff88" stop-opacity="0.06"/>
-              <stop offset="100%" stop-color="#00ff88" stop-opacity="0"/>
-            </radialGradient>
-            <radialGradient id="gp-eye" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stop-color="#66ffaa"/>
-              <stop offset="100%" stop-color="#009955"/>
-            </radialGradient>
-          </defs>
-          <circle cx="80" cy="80" r="72" fill="url(#gp-glow)"/>
-          <!-- Terminal frame -->
-          <rect x="32" y="36" width="96" height="88" rx="6" stroke="#00ff88" stroke-width="1.5" fill="none" opacity="0.25"/>
-          <rect x="36" y="40" width="88" height="80" rx="4" stroke="#00ff88" stroke-width="0.5" fill="none" opacity="0.12"/>
-          <!-- All-seeing eye -->
-          <ellipse cx="80" cy="76" rx="32" ry="18" fill="none" stroke="#00ff88" stroke-width="1.5" opacity="0.6"/>
-          <circle cx="80" cy="76" r="12" fill="url(#gp-eye)" opacity="0.8"/>
-          <circle cx="80" cy="76" r="5" fill="#040d08"/>
-          <circle cx="77" cy="73" r="2" fill="#ffffff" opacity="0.4"/>
-          <!-- Rays from eye -->
-          <line x1="80" y1="52" x2="80" y2="42" stroke="#00ff88" stroke-width="0.8" opacity="0.3"/>
-          <line x1="80" y1="100" x2="80" y2="110" stroke="#00ff88" stroke-width="0.8" opacity="0.3"/>
-          <line x1="52" y1="68" x2="44" y2="62" stroke="#00ff88" stroke-width="0.8" opacity="0.25"/>
-          <line x1="108" y1="68" x2="116" y2="62" stroke="#00ff88" stroke-width="0.8" opacity="0.25"/>
-          <line x1="52" y1="84" x2="44" y2="90" stroke="#00ff88" stroke-width="0.8" opacity="0.25"/>
-          <line x1="108" y1="84" x2="116" y2="90" stroke="#00ff88" stroke-width="0.8" opacity="0.25"/>
-          <!-- Terminal text accents -->
-          <text x="40" y="50" font-family="monospace" font-size="7" fill="#00ff88" opacity="0.25">$_</text>
-          <text x="100" y="114" font-family="monospace" font-size="7" fill="#00ff88" opacity="0.2">EOF</text>
-          <!-- Corner brackets -->
-          <path d="M38 42 L38 48" stroke="#009955" stroke-width="1" opacity="0.3"/>
-          <path d="M38 42 L44 42" stroke="#009955" stroke-width="1" opacity="0.3"/>
-          <path d="M122 42 L122 48" stroke="#009955" stroke-width="1" opacity="0.3"/>
-          <path d="M122 42 L116 42" stroke="#009955" stroke-width="1" opacity="0.3"/>
-          <path d="M38 118 L38 112" stroke="#009955" stroke-width="1" opacity="0.3"/>
-          <path d="M38 118 L44 118" stroke="#009955" stroke-width="1" opacity="0.3"/>
-          <path d="M122 118 L122 112" stroke="#009955" stroke-width="1" opacity="0.3"/>
-          <path d="M122 118 L116 118" stroke="#009955" stroke-width="1" opacity="0.3"/>
-        </svg>`;
-      }
     }
   };
+
+  const imageFolders = {
+    'unsloth/gemma-3-27b-it': 'gemma',
+    'moonshotai/Kimi-K2-Instruct': 'kimi',
+    'Qwen/Qwen3-Coder-480B-A35B-Instruct': 'qwen',
+    'Qwen/Qwen2.5-72B-Instruct': 'qwen',
+    'Qwen/Qwen2.5-32B-Instruct': 'qwen',
+    'Qwen/Qwen3-32B': 'qwen',
+    'Qwen/Qwen3-Next-80B-A3B-Instruct': 'qwen',
+    'nousresearch/Hermes-4.3-36B': 'qwen',
+    'chutesai/Mistral-Small-3.2-24B-Instruct-2506': 'mistral',
+    'deepseek/DeepSeek-V3-base': 'deepseek',
+    'THUDM/GLM-4-32B': 'glm',
+    'minimax/MiniMax-M2.1-8B-Instruct': 'minimax'
+  };
+
+  function getCharacterImageForState(modelId, state, cacheBust = null) {
+    const folder = imageFolders[modelId] || 'mistral';
+    
+    const isMinimax = folder === 'minimax';
+    
+    const stateFileMap = {
+      'default': 'default',
+      'judged': 'judged',
+      'judging': 'judging',
+      'lose': 'lose',
+      'thinking': isMinimax ? 'hand-raised' : 'raising-hand',
+      'safe-lie': 'safe-lie',
+      'safe-truth': state === 'safe-truth' && folder === 'deepseek' ? 'safe-true' : 'safe-truth',
+      'win': 'win'
+    };
+    
+    const fileName = stateFileMap[state] || 'default';
+    const cacheParam = cacheBust ? `?t=${cacheBust}` : '';
+    const imagePath = `/images/${folder}/llms_${folder}_${fileName}.png${cacheParam}`;
+    return `<img src="${imagePath}" alt="character" class="character-state-image" />`;
+  }
 
   // Fallback theme for unknown models
   const defaultTheme = {
@@ -594,7 +483,8 @@ window.ModelThemes = (() => {
         <circle cx="80" cy="80" r="40" stroke="#9a9ab0" stroke-width="1.5" fill="none" opacity="0.2"/>
         <text x="80" y="88" text-anchor="middle" font-family="monospace" font-size="28" fill="#9a9ab0" opacity="0.6">?</text>
       </svg>`;
-    }
+    },
+      
   };
 
   return {
@@ -603,7 +493,17 @@ window.ModelThemes = (() => {
     },
     getDefault() {
       return defaultTheme;
+    },
+    getCharacterImage(modelId, state, cacheBust) {
+      // Direct call to function - themes don't need characterImageForState
+      return getCharacterImageForState(modelId, state, cacheBust);
+    },
+    getThumbnail(modelId) {
+      const folder = imageFolders[modelId] || 'mistral';
+      return `/images/${folder}/llms_${folder}_default.png`;
+    },
+    getFolder(modelId) {
+      return imageFolders[modelId] || 'mistral';
     }
   };
-
 })();
